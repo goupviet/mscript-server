@@ -90,23 +90,14 @@ namespace metascript
                             throw new ScriptException("Incorrect params for delete function: table_name, key_value(s)");
                         if (!(paramList[0] is string))
                             throw new ScriptException("The first parameter to the delete function must be the table name as a string");
-                        list valuesToDelete = new list();
-                        if ((paramList[1] is list))
+                        if (!(paramList[1] is list))
+                            throw new ScriptException("The second parameter to the delete function must be list of keys to delete");
+                        list valuesToDelete;
+                        valuesToDelete = (list)paramList[1];
+                        foreach (var val in valuesToDelete)
                         {
-                            foreach (var val in (list)paramList[1])
-                            {
-                                if (!(val is string) && !(val is double))
-                                    throw new ScriptException("The the keys of the items to delete must be either strings or numbers");
-                            }
-                            valuesToDelete.AddRange((list)paramList[1]);
-                        }
-                        else if (!(paramList[1] is string) && !(paramList[1] is double))
-                        {
-                            throw new ScriptException("The the key of the item to delete must be either a string or a number");
-                        }
-                        else
-                        {
-                            valuesToDelete.Add(paramList[1]);
+                            if (!(val is string) && !(val is double))
+                                throw new ScriptException("The the keys of the items to delete must be either strings or numbers");
                         }
                         await ctxt.Cmd.DeleteAsync(ScopeTableName(state, (string)paramList[0]), valuesToDelete);
                         return null;
