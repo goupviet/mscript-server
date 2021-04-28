@@ -152,7 +152,8 @@ namespace metascript
 #if !DEBUG
             catch (Exception exp)
             {
-                Console.WriteLine("Unhandled EXCEPTION: " + exp);
+                if (!(exp is PageFinishException))
+                    Console.WriteLine("Unhandled EXCEPTION: " + exp);
             }
 #endif
         }
