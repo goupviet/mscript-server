@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "scriptcmd": {
+      "commandName": "Project",
+      "commandLineArgs": "deleteuser foo@bar.com"
+    }
+  }
+}
