@@ -28,13 +28,13 @@ namespace metascript
             string errorInfo = GetErrorInfo(state, userIp);
             if (!string.IsNullOrWhiteSpace(state.ReturnPage) && exp is UserException)
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}", logCtxt);
-                await state.FinishWithMessageAsync(state.ReturnPage, exp.Message);
+                await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}", logCtxt).ConfigureAwait(false);
+                await state.FinishWithMessageAsync(state.ReturnPage, exp.Message).ConfigureAwait(false);
             }
             else
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}", logCtxt);
-                await state.FinishWithMessageAsync(state.ReturnPage, "Sorry, an unexpected error occurred.\n\nTry again later, failing that, email contact@mscript.info for help");
+                await Logs.LogErrorAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}", logCtxt).ConfigureAwait(false);
+                await state.FinishWithMessageAsync(state.ReturnPage, "Sorry, an unexpected error occurred.\n\nTry again later, failing that, email contact@mscript.info for help").ConfigureAwait(false);
             }
         }
 

@@ -26,7 +26,7 @@ namespace metascript
             if (string.IsNullOrWhiteSpace(sessionKey))
                 return -1;
 
-            long userId = await Session.GetSessionAsync(state.MsCtxt, sessionKey);
+            long userId = await Session.GetSessionAsync(state.MsCtxt, sessionKey).ConfigureAwait(false);
             if (userId < 0)
                 ClearUserSession(state);
             return userId;
@@ -48,7 +48,7 @@ namespace metascript
                     userId = userId,
                     ip = GetClientIpAddress(state)
                 };
-            await Logs.LogErrorAsync(state.MsCtxt, msg, logCtxt);
+            await Logs.LogErrorAsync(state.MsCtxt, msg, logCtxt).ConfigureAwait(false);
         }
 
         public static async Task LogAsync(HttpState state, LogLevel level, string msg)
@@ -59,22 +59,22 @@ namespace metascript
             var logCtxt =
                 new LogContext()
                 {
-                    userId = await GetLoggedInUserIdAsync(state),
+                    userId = await GetLoggedInUserIdAsync(state).ConfigureAwait(false),
                     ip = GetClientIpAddress(state)
                 };
-            await Logs.LogAsync(state.MsCtxt, level, msg, logCtxt);
+            await Logs.LogAsync(state.MsCtxt, level, msg, logCtxt).ConfigureAwait(false);
         }
 
         public static async Task LogInfoAsync(HttpState state, string msg)
         {
-            await LogAsync(state, LogLevel.INFO, msg);
+            await LogAsync(state, LogLevel.INFO, msg).ConfigureAwait(false);
         }
 
         public static async Task LogTraceAsync(HttpState state, string msg)
         {
             if (Logs.ShouldSkip(LogLevel.TRACE))
                 return;
-            await LogAsync(state, LogLevel.TRACE, msg);
+            await LogAsync(state, LogLevel.TRACE, msg).ConfigureAwait(false);
         }
 
         public static async Task LogTraceAsync(HttpState state, string msg, object arg0)
@@ -83,7 +83,7 @@ namespace metascript
                 return;
 
             msg = string.Format(msg, arg0);
-            await LogAsync(state, LogLevel.TRACE, msg);
+            await LogAsync(state, LogLevel.TRACE, msg).ConfigureAwait(false);
         }
 
         public static async Task LogTraceAsync(HttpState state, string msg, object arg0, object arg1)
@@ -92,7 +92,7 @@ namespace metascript
                 return;
 
             msg = string.Format(msg, arg0, arg1);
-            await LogAsync(state, LogLevel.TRACE, msg);
+            await LogAsync(state, LogLevel.TRACE, msg).ConfigureAwait(false);
         }
 
         public static async Task LogTraceAsync(HttpState state, string msg, params object [] args)
@@ -101,16 +101,16 @@ namespace metascript
                 return;
 
             msg = string.Format(msg, args);
-            await LogAsync(state, LogLevel.TRACE, msg);
+            await LogAsync(state, LogLevel.TRACE, msg).ConfigureAwait(false);
         }
 
         public static async Task<long> EnsureLoggedInAsync(HttpState state, string area)
         {
-            long userId = await GetLoggedInUserIdAsync(state);
+            long userId = await GetLoggedInUserIdAsync(state).ConfigureAwait(false);
             if (userId < 0)
             {
-                await LogInfoAsync(state, $"{area}: Not logged in");
-                await state.SetFinalStatusAsync(401, "Sorry, you are not logged in");
+                await LogInfoAsync(state, $"{area}: Not logged in").ConfigureAwait(false);
+                await state.SetFinalStatusAsync(401, "Sorry, you are not logged in").ConfigureAwait(false);
             }
             return userId;
         }
@@ -123,10 +123,10 @@ namespace metascript
                 if (string.IsNullOrWhiteSpace(token))
                     throw new UserException("Your login token is missing, try again");
 
-                await LogTraceAsync(state, "Login Link: {0} - {1}", token, email);
-                User user = await User.HandleLoginTokenAsync(state, token, email);
-                await CreateUserSessionAsync(state, user);
-                await state.FinishWithMessageAsync("index.html", "You are now signed in");
+                await LogTraceAsync(state, "Login Link: {0} - {1}", token, email).ConfigureAwait(false);
+                User user = await User.HandleLoginTokenAsync(state, token, email).ConfigureAwait(false);
+                await CreateUserSessionAsync(state, user).ConfigureAwait(false);
+                await state.FinishWithMessageAsync("index.html", "You are now signed in").ConfigureAwait(false);
                 return;
             }
             catch
@@ -135,12 +135,12 @@ namespace metascript
             }
 
             ClearUserSession(state);
-            await state.FinishWithMessageAsync("index.html", "Sorry, your login attempt failed, please try again");
+            await state.FinishWithMessageAsync("index.html", "Sorry, your login attempt failed, please try again").ConfigureAwait(false);
         }
 
         public static async Task CreateUserSessionAsync(HttpState state, User user)
         {
-            string sessionToken = await Session.CreateSessionAsync(state, user.Id);
+            string sessionToken = await Session.CreateSessionAsync(state, user.Id).ConfigureAwait(false);
             state.SetResponseSession(sessionToken);
         }
 
@@ -157,9 +157,9 @@ namespace metascript
             string textTemplate = emailTemplates.Item1.Replace("[ACCESS CODE]", user.LoginToken).Replace("[NAME]", user.Name);
             string htmlTemplate = emailTemplates.Item2.Replace("[ACCESS CODE]", user.LoginToken).Replace("[NAME]", user.Name);
 
-            await Email.SendEmailAsync(state, user.Email, user.Name, subject, textTemplate, htmlTemplate);
+            await Email.SendEmailAsync(state, user.Email, user.Name, subject, textTemplate, htmlTemplate).ConfigureAwait(false);
 
-            await state.FinishWithMessageAsync(page, "Check your email for your sign in token");
+            await state.FinishWithMessageAsync(page, "Check your email for your sign in token").ConfigureAwait(false);
         }
 
         public static string GetClientIpAddress(HttpState state)
@@ -179,9 +179,8 @@ namespace metascript
         {
             var logCtxt = new LogContext() { ip = GetClientIpAddress(state), userId = state.UserId };
             string errorInfo = Errors.GetErrorInfo(state, GetClientIpAddress(state));
-            using (var ctxt = new Context())
-            await Logs.LogErrorAsync(ctxt, $"User Exception: {errorInfo}: {exp.Message}", logCtxt);
-            await state.SetFinalStatusAsync(400, exp.Message);
+            await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}", logCtxt).ConfigureAwait(false);
+            await state.SetFinalStatusAsync(400, exp.Message).ConfigureAwait(false);
         }
 
         public static async Task<AuthorScript> GetAuthorScript(HttpState state)
@@ -189,7 +188,7 @@ namespace metascript
             string author = state.HttpCtxt.Request.QueryString["author"];
             if (string.IsNullOrWhiteSpace(author))
             {
-                await state.SetFinalStatusAsync(403, "Sorry, you have to specify the author");
+                await state.SetFinalStatusAsync(403, "Sorry, you have to specify the author").ConfigureAwait(false);
                 return null;
             }
             author = author.Replace('+', ' ');
@@ -197,7 +196,7 @@ namespace metascript
             string scriptName = state.HttpCtxt.Request.QueryString["scriptName"];
             if (string.IsNullOrWhiteSpace(scriptName))
             {
-                await state.SetFinalStatusAsync(403, "Sorry, you have to specify the script name");
+                await state.SetFinalStatusAsync(403, "Sorry, you have to specify the script name").ConfigureAwait(false);
                 return null;
             }
             scriptName = scriptName.Replace('+', ' ');

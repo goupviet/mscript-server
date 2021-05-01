@@ -124,7 +124,7 @@ namespace metascript
                             break;
 
                         default:
-                            await WebUtils.LogInfoAsync(state, $"Page not found: {path}");
+                            await WebUtils.LogInfoAsync(state, $"Page not found: {path}").ConfigureAwait(false);
                             httpCtxt.Response.StatusCode = 404;
                             return;
                     }
@@ -132,7 +132,7 @@ namespace metascript
                     Exception capturedException;
                     try
                     {
-                        await page.HandleRequestAsync(state);
+                        await page.HandleRequestAsync(state).ConfigureAwait(false);
                         Console.WriteLine("Handler completes");
                         return;
                     }
@@ -146,7 +146,7 @@ namespace metascript
                         Console.WriteLine("Handler ERROR");
                         capturedException = pageExp;
                     }
-                    await Errors.HandleErrorAsync(state, capturedException);
+                    await Errors.HandleErrorAsync(state, capturedException).ConfigureAwait(false);
                 }
             }
 #if !DEBUG

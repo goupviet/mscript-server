@@ -56,7 +56,7 @@ namespace metascript
         public async Task WriteResponseAsync(string str)
         {
             using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(str);
+                await writer.WriteAsync(str).ConfigureAwait(false);
         }
 
         public Dictionary<string, string> RequestCookies
@@ -93,7 +93,7 @@ namespace metascript
             ReadInput = true;
 
             using (var reader = new StreamReader(HttpCtxt.Request.InputStream, leaveOpen: true))
-                m_requestPost = await reader.ReadToEndAsync();
+                m_requestPost = await reader.ReadToEndAsync().ConfigureAwait(false);
             return m_requestPost;
         }
         public string m_requestPost;
@@ -114,7 +114,7 @@ namespace metascript
                 else
                 {
                     using (var reader = new StreamReader(HttpCtxt.Request.InputStream, leaveOpen: true))
-                        json = await reader.ReadToEndAsync();
+                        json = await reader.ReadToEndAsync().ConfigureAwait(false);
                 }
 
                 m_requestFields = MUtils.StringToObject<Dictionary<string, string>>(json);
@@ -133,7 +133,7 @@ namespace metascript
             HttpCtxt.Response.StatusCode = statusCode;
 
             using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(statusDescription);
+                await writer.WriteAsync(statusDescription).ConfigureAwait(false);
         }
 
         public void SetResponseSession(string key)
@@ -144,7 +144,7 @@ namespace metascript
         public async Task FinishWithMessageAsync(string page, string msg)
         {
             SetResponseCookie("message", msg);
-            await FinishAsync(page);
+            await FinishAsync(page).ConfigureAwait(false);
         }
 
         private void SetResponseCookie(string name, string value)
@@ -164,7 +164,7 @@ namespace metascript
             string payload = GetFinishPayload(page);
 
             using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(payload);
+                await writer.WriteAsync(payload).ConfigureAwait(false);
 
             throw new PageFinishException();
         }

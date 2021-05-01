@@ -30,7 +30,7 @@ namespace metascript
         {
             List<LogEntry> output = new List<LogEntry>();
             {
-                var errorEntries = await ErrorLog.QueryAsync(ctxt, logQuery.like, logQuery.maxAgeDays);
+                var errorEntries = await ErrorLog.QueryAsync(ctxt, logQuery.like, logQuery.maxAgeDays).ConfigureAwait(false);
                 foreach (var entry in errorEntries)
                 {
                     if (!string.IsNullOrWhiteSpace(logQuery.ip) && entry.ip != logQuery.ip)
@@ -85,9 +85,9 @@ namespace metascript
                 var select = Sql.Parse(sql);
                 select.cmdParams = cmdParams;
 
-                using (var reader = await ctxt.ExecSelectAsync(select))
+                using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
                 {
-                    while (await reader.ReadAsync())
+                    while (await reader.ReadAsync().ConfigureAwait(false))
                     {
                         var newEntry =
                             new LogEntry()

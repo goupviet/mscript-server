@@ -24,7 +24,7 @@ namespace metascript
 
         public async Task<object> CallAsync(object context, list paramList)
         {
-            return await DbScripting.DoDbAsync(context, m_name, paramList);
+            return await DbScripting.DoDbAsync(context, m_name, paramList).ConfigureAwait(false);
         }
 
         private string m_name;
@@ -78,9 +78,9 @@ namespace metascript
                                 define.Set(Utils.ToString(kvp.Key), kvp.Value);
                             }
                         }
-                        await ctxt.Cmd.DefineAsync(define);
+                        await ctxt.Cmd.DefineAsync(define).ConfigureAwait(false);
 
-                        double rowId = await ctxt.GetRowIdAsync(tableName, keyValue);
+                        double rowId = await ctxt.GetRowIdAsync(tableName, keyValue).ConfigureAwait(false);
                         return rowId;
                     }
 
@@ -99,7 +99,7 @@ namespace metascript
                             if (!(val is string) && !(val is double))
                                 throw new ScriptException("The the keys of the items to delete must be either strings or numbers");
                         }
-                        await ctxt.Cmd.DeleteAsync(ScopeTableName(state, (string)paramList[0]), valuesToDelete);
+                        await ctxt.Cmd.DeleteAsync(ScopeTableName(state, (string)paramList[0]), valuesToDelete).ConfigureAwait(false);
                         return null;
                     }
 
@@ -109,20 +109,20 @@ namespace metascript
                             throw new ScriptException("Incorrect params for drop function: table_name");
                         if (!(paramList[0] is string))
                             throw new ScriptException("The parameter to the drop function must be the table name as a string");
-                        await ctxt.Cmd.DropAsync(ScopeTableName(state, (string)paramList[0]));
+                        await ctxt.Cmd.DropAsync(ScopeTableName(state, (string)paramList[0])).ConfigureAwait(false);
                         return null;
                     }
 
                 case "msdb.selectValue":
                     {
-                        object val = await ctxt.ExecScalarAsync(CreateSelect(state, paramList));
+                        object val = await ctxt.ExecScalarAsync(CreateSelect(state, paramList)).ConfigureAwait(false);
                         val = CoerceDbValue(val);
                         return val;
                     }
 
                 case "msdb.selectList":
                     {
-                        list vals = await ctxt.ExecListAsync<object>(CreateSelect(state, paramList));
+                        list vals = await ctxt.ExecListAsync<object>(CreateSelect(state, paramList)).ConfigureAwait(false);
                         for (int v = 0; v < vals.Count; ++v)
                             vals[v] = CoerceDbValue(vals[v]);
                         return vals;
@@ -131,7 +131,7 @@ namespace metascript
                 case "msdb.selectIndex":
                     {
                         var  metastringsResult 
-                            = await ctxt.ExecDictAsync<object, object>(CreateSelect(state, paramList));
+                            = await ctxt.ExecDictAsync<object, object>(CreateSelect(state, paramList)).ConfigureAwait(false);
                         index retVal = new index();
                         foreach (var kvp in metastringsResult.Entries)
                             retVal.Add(CoerceDbValue(kvp.Key), CoerceDbValue(kvp.Value));
@@ -141,9 +141,9 @@ namespace metascript
                 case "msdb.selectRecords":
                     {
                         list rows = new list();
-                        using (var reader = await ctxt.ExecSelectAsync(CreateSelect(state, paramList)))
+                        using (var reader = await ctxt.ExecSelectAsync(CreateSelect(state, paramList)).ConfigureAwait(false))
                         {
-                            while (await reader.ReadAsync())
+                            while (await reader.ReadAsync().ConfigureAwait(false))
                             {
                                 index row = new index();
                                 for (int f = 0; f < reader.FieldCount; ++f)

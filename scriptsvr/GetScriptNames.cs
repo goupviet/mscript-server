@@ -11,12 +11,12 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state);
+            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
             if (state.UserId < 0)
                 throw new UserException("Sorry, you need to be logged in to get scripts");
 
-            List<string> scriptNames = await Script.GetUserScriptNamesAsync(state, state.UserId);
-            await state.WriteResponseAsync(JsonConvert.SerializeObject(scriptNames));
+            List<string> scriptNames = await Script.GetUserScriptNamesAsync(state, state.UserId).ConfigureAwait(false);
+            await state.WriteResponseAsync(JsonConvert.SerializeObject(scriptNames)).ConfigureAwait(false);
         }
     }
 }

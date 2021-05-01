@@ -10,12 +10,12 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state);
+            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
             if (state.UserId < 0)
                 throw new UserException("Sorry, you need to be logged in to delete scripts");
 
             string name = state.HttpCtxt.Request.QueryString["name"];
-            await Script.DeleteScriptAsync(state, state.UserId, name);
+            await Script.DeleteScriptAsync(state, state.UserId, name).ConfigureAwait(false);
         }
     }
 }

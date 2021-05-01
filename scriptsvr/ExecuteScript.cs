@@ -9,7 +9,7 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state);
+            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
             if (state.UserId < 0)
                 throw new UserException("Sorry, you need to be logged in to execute scripts");
 
@@ -17,8 +17,8 @@ namespace metascript
             if (string.IsNullOrWhiteSpace(scriptName))
                 throw new UserException("Specify the script you want to run");
             
-            await WebUtils.LogTraceAsync(state, "ExecuteScript: {0}", scriptName);
-            var scriptText = await Script.GetScriptTextAsync(state, state.UserId, scriptName);
+            await WebUtils.LogTraceAsync(state, "ExecuteScript: {0}", scriptName).ConfigureAwait(false);
+            var scriptText = await Script.GetScriptTextAsync(state, state.UserId, scriptName).ConfigureAwait(false);
             if (scriptText == null) // empty is okay
                 throw new UserException("Sorry, the script was not found");
 
@@ -39,7 +39,7 @@ namespace metascript
                 ScriptException collectedExp;
                 try
                 {
-                    await processor.ProcessAsync();
+                    await processor.ProcessAsync().ConfigureAwait(false);
                     return;
                 }
                 catch (ScriptException exp)
@@ -53,7 +53,7 @@ namespace metascript
                         $"\nERROR: {collectedExp.Message}\n" +
                         $"Line {collectedExp.LineNumber}:\n" +
                         $"{collectedExp.Line}\n"
-                    );
+                    ).ConfigureAwait(false);
                 }
             }
         }

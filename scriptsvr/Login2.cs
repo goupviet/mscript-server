@@ -8,10 +8,10 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            var requestFieldsDict = await state.GetRequestFieldsAsync();
+            var requestFieldsDict = await state.GetRequestFieldsAsync().ConfigureAwait(false);
             string email = WebUtils.GetField("email", requestFieldsDict);
             string loginToken = WebUtils.GetField("token", requestFieldsDict);
-            await WebUtils.OnLoginLinkAsync(state, loginToken, email);
+            await WebUtils.OnLoginLinkAsync(state, loginToken, email).ConfigureAwait(false);
         }
     }
 }

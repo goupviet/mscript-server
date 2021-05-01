@@ -23,9 +23,9 @@ namespace metascript
                 );
             select.cmdParams = new Dictionary<string, object> { { "@scriptId", scriptId } };
             Script script;
-            using (var reader = await ctxt.ExecSelectAsync(select))
+            using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
             {
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     throw new MException("Script not found: " + scriptId);
 
                 script =
@@ -46,7 +46,7 @@ namespace metascript
                         fieldName = "text",
                         itemId = scriptId
                     }
-                );
+                ).ConfigureAwait(false);
 
             return script;
         }
@@ -59,7 +59,7 @@ namespace metascript
                     $"SELECT name FROM scripts WHERE userid = @userid"
                 );
             select.cmdParams = new Dictionary<string, object> { { "@userId", userId } };
-            var scriptNames = await state.MsCtxt.ExecListAsync<string>(select);
+            var scriptNames = await state.MsCtxt.ExecListAsync<string>(select).ConfigureAwait(false);
             return scriptNames;
         }
 
@@ -73,7 +73,7 @@ namespace metascript
                         $"SELECT id FROM scripts WHERE userid = @userid AND name = @name"
                     );
                 select.cmdParams = new Dictionary<string, object> { { "@userId", userId }, { "@name", name } };
-                scriptId = await state.MsCtxt.ExecScalar64Async(select);
+                scriptId = await state.MsCtxt.ExecScalar64Async(select).ConfigureAwait(false);
                 if (scriptId < 0)
                     throw new UserException("Script not found: " + name);
             }
@@ -87,20 +87,20 @@ namespace metascript
                         fieldName = "text",
                         itemId = scriptId
                     }
-                );
+                ).ConfigureAwait(false);
             return text;
         }
 
         public static async Task SaveScriptAsync(HttpState state, Script script)
         {
-            await WebUtils.LogTraceAsync(state, "SaveScript: {0}", script.name);
+            await WebUtils.LogTraceAsync(state, "SaveScript: {0}", script.name).ConfigureAwait(false);
             string key = $"{script.userId}:{script.name}";
             var define = new Define("scripts", key);
             define.Set("userid", script.userId);
             define.Set("name", script.name);
-            await state.MsCtxt.Cmd.DefineAsync(define);
+            await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
 
-            script.id = await state.MsCtxt.GetRowIdAsync("scripts", key);
+            script.id = await state.MsCtxt.GetRowIdAsync("scripts", key).ConfigureAwait(false);
             if (script.text != null)
             {
                 await state.MsCtxt.Cmd.PutLongStringAsync
@@ -112,32 +112,32 @@ namespace metascript
                         itemId = script.id,
                         longString = script.text
                     }
-                );
+                ).ConfigureAwait(false);
             }
         }
 
         public static async Task RenameScriptAsync(HttpState state, long userId, string oldName, string newName)
         {
-            await WebUtils.LogInfoAsync(state, $"RenameScript: {oldName} -> {newName}");
+            await WebUtils.LogInfoAsync(state, $"RenameScript: {oldName} -> {newName}").ConfigureAwait(false);
             if (oldName == newName)
                 throw new UserException("You cannot set a script title to its current value.");
 
-            long rowId = await state.MsCtxt.GetRowIdAsync("scripts", $"{userId}:{oldName}");
-            var script = await GetScriptAsync(state.MsCtxt, rowId);
+            long rowId = await state.MsCtxt.GetRowIdAsync("scripts", $"{userId}:{oldName}").ConfigureAwait(false);
+            var script = await GetScriptAsync(state.MsCtxt, rowId).ConfigureAwait(false);
             if (script == null)
                 throw new UserException("Script to rename not found: " + oldName);
 
             script.name = newName;
-            await SaveScriptAsync(state, script);
+            await SaveScriptAsync(state, script).ConfigureAwait(false);
 
-            await DeleteScriptAsync(state, userId, oldName);
+            await DeleteScriptAsync(state, userId, oldName).ConfigureAwait(false);
         }
 
         public static async Task DeleteScriptAsync(HttpState state, long userId, string name)
         {
-            await WebUtils.LogInfoAsync(state, $"DeleteScript: {name}");
+            await WebUtils.LogInfoAsync(state, $"DeleteScript: {name}").ConfigureAwait(false);
             string key = $"{userId}:{name}";
-            await state.MsCtxt.Cmd.DeleteAsync("scripts", key);
+            await state.MsCtxt.Cmd.DeleteAsync("scripts", key).ConfigureAwait(false);
         }
 
         public static async Task<long> GetScriptIdAsync(Context ctxt, string author, string name)
@@ -146,7 +146,7 @@ namespace metascript
             {
                 var select = Sql.Parse("SELECT id FROM users WHERE name = @author");
                 select.AddParam("@author", author);
-                userId = await ctxt.ExecScalar64Async(select);
+                userId = await ctxt.ExecScalar64Async(select).ConfigureAwait(false);
                 if (userId < 0)
                     return -1;
             }
@@ -156,7 +156,7 @@ namespace metascript
                 var select = Sql.Parse("SELECT id FROM scripts WHERE userid = @userId AND name = @name");
                 select.AddParam("@userId", userId);
                 select.AddParam("@name", name);
-                scriptId = await ctxt.ExecScalar64Async(select);
+                scriptId = await ctxt.ExecScalar64Async(select).ConfigureAwait(false);
             }
             return scriptId;
         }

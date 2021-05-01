@@ -17,12 +17,12 @@ namespace metascript
 
         public static async Task<User> CreateUserAsync(HttpState state, string email, string name)
         {
-            await WebUtils.LogInfoAsync(state, $"CreateUser: {email} - {name}");
+            await WebUtils.LogInfoAsync(state, $"CreateUser: {email} - {name}").ConfigureAwait(false);
 
-            if (await GetUserIdFromEmailAsync(state.MsCtxt, email) >= 0 || await IsNameTakenAsync(state, email))
+            if (await GetUserIdFromEmailAsync(state.MsCtxt, email).ConfigureAwait(false) >= 0 || await IsNameTakenAsync(state, email).ConfigureAwait(false))
                 throw new UserException("Another user is registered with this email address: " + email);
             
-            if (await GetUserIdFromNameAsync(state.MsCtxt, name) >= 0 || await IsNameTakenAsync(state, name))
+            if (await GetUserIdFromNameAsync(state.MsCtxt, name).ConfigureAwait(false) >= 0 || await IsNameTakenAsync(state, name).ConfigureAwait(false))
                 throw new UserException("Another user is registered with this name: " + name);
 
             string userKey = Guid.NewGuid().ToString();
@@ -31,12 +31,12 @@ namespace metascript
             define.Set("name", name);
             define.Set("logintoken", "");
             define.Set("blocked", 0.0);
-            await state.MsCtxt.Cmd.DefineAsync(define);
+            await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
 
-            await RecordNameTakenAsync(state, email);
-            await RecordNameTakenAsync(state, name);
+            await RecordNameTakenAsync(state, email).ConfigureAwait(false);
+            await RecordNameTakenAsync(state, name).ConfigureAwait(false);
 
-            long newUserId = await state.MsCtxt.GetRowIdAsync("users", userKey);
+            long newUserId = await state.MsCtxt.GetRowIdAsync("users", userKey).ConfigureAwait(false);
             var newUser =
                 new User()
                 {
@@ -57,9 +57,9 @@ namespace metascript
 
             var select = Sql.Parse($"SELECT email, name, logintoken, blocked, created FROM users WHERE id = @userid");
             select.AddParam("@userid", id);
-            using (var reader = await ctxt.ExecSelectAsync(select))
+            using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
             {
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     throw new MException($"User not found: {id}");
 
                 var newUser =
@@ -83,9 +83,9 @@ namespace metascript
 
             var select = Sql.Parse("SELECT email FROM users WHERE id = @id");
             select.AddParam("@id", id);
-            using (var reader = await ctxt.ExecSelectAsync(select))
+            using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
             {
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return $"unknown ({id})";
 
                 string email = reader.GetString(0);
@@ -100,9 +100,9 @@ namespace metascript
 
             var select = Sql.Parse("SELECT name FROM users WHERE id = @id");
             select.AddParam("@id", id);
-            using (var reader = await ctxt.ExecSelectAsync(select))
+            using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
             {
-                if (!await reader.ReadAsync())
+                if (!await reader.ReadAsync().ConfigureAwait(false))
                     return $"unknown ({id})";
 
                 string name = reader.GetString(0);
@@ -114,30 +114,30 @@ namespace metascript
         {
             var query = Sql.Parse("SELECT id FROM users WHERE email = @email");
             query.AddParam("@email", email);
-            return await ctxt.ExecScalar64Async(query);
+            return await ctxt.ExecScalar64Async(query).ConfigureAwait(false);
         }
 
         public static async Task<long> GetUserIdFromNameAsync(Context ctxt, string name)
         {
             var query = Sql.Parse("SELECT id FROM users WHERE name = @name");
             query.AddParam("@name", name);
-            return await ctxt.ExecScalar64Async(query);
+            return await ctxt.ExecScalar64Async(query).ConfigureAwait(false);
         }
 
         public static async Task SetLoginTokenAsync(HttpState state, User user)
         {
             string loginToken = MUtils.CreateToken(6).ToUpper();
-            await WebUtils.LogTraceAsync(state, "SetLoginToken: {0}: {1}", user.Email, loginToken);
-            string userKey = (await state.MsCtxt.GetRowValueAsync("users", user.Id)).ToString();
+            await WebUtils.LogTraceAsync(state, "SetLoginToken: {0}: {1}", user.Email, loginToken).ConfigureAwait(false);
+            string userKey = (await state.MsCtxt.GetRowValueAsync("users", user.Id).ConfigureAwait(false)).ToString();
             var define = new Define("users", userKey);
             define.Set("logintoken", loginToken);
-            await state.MsCtxt.Cmd.DefineAsync(define);
+            await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
             user.LoginToken = loginToken;
         }
 
         public static async Task<User> HandleLoginTokenAsync(HttpState state, string token, string email)
         {
-            await WebUtils.LogTraceAsync(state, "HandleLoginToken: {0} - {1}", token, email);
+            await WebUtils.LogTraceAsync(state, "HandleLoginToken: {0} - {1}", token, email).ConfigureAwait(false);
 
             token = token.ToUpper();
 
@@ -147,38 +147,38 @@ namespace metascript
 
             var query = Sql.Parse("SELECT id FROM users WHERE logintoken = @token AND email = @email");
             query.AddParam("@token", token).AddParam("@email", email);
-            long userId = await state.MsCtxt.ExecScalar64Async(query);
+            long userId = await state.MsCtxt.ExecScalar64Async(query).ConfigureAwait(false);
             if (userId < 0)
             {
-                userId = await GetUserIdFromEmailAsync(state.MsCtxt, email);
+                userId = await GetUserIdFromEmailAsync(state.MsCtxt, email).ConfigureAwait(false);
                 if (userId >= 0)
                 {
-                    string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId)).ToString();
+                    string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId).ConfigureAwait(false)).ToString();
                     var define = new Define("users", userKey);
                     define.Set("logintoken", "");
-                    await state.MsCtxt.Cmd.DefineAsync(define);
+                    await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
                 }
                 throw new UserException($"No drummer found with token {token}"); // caller can clear the cookie
             }
 
             {
-                string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId)).ToString();
+                string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId).ConfigureAwait(false)).ToString();
                 var define = new Define("users", userKey);
                 define.Set("logintoken", "");
-                await state.MsCtxt.Cmd.DefineAsync(define);
+                await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
             }
 
-            await WebUtils.LogTraceAsync(state, "HandleLoginToken: {0} -> {1}", token, userId);
-            return await GetUserAsync(state.MsCtxt, userId); // caller's convenience
+            await WebUtils.LogTraceAsync(state, "HandleLoginToken: {0} -> {1}", token, userId).ConfigureAwait(false);
+            return await GetUserAsync(state.MsCtxt, userId).ConfigureAwait(false); // caller's convenience
         }
 
         public static async Task DeleteUserAsync(HttpState state, string email)
         {
-            await WebUtils.LogInfoAsync(state, $"DeleteUserAsync: {email}");
+            await WebUtils.LogInfoAsync(state, $"DeleteUserAsync: {email}").ConfigureAwait(false);
             bool isFirst = true;
             while (true)
             {
-                long userId = await GetUserIdFromEmailAsync(state.MsCtxt, email);
+                long userId = await GetUserIdFromEmailAsync(state.MsCtxt, email).ConfigureAwait(false);
                 if (userId < 0)
                 {
                     if (isFirst)
@@ -191,12 +191,12 @@ namespace metascript
                 {
                     var select = Sql.Parse("SELECT value FROM scripts WHERE userid = @userid");
                     select.AddParam("@userid", userId);
-                    var scriptValues = await state.MsCtxt.ExecListAsync<object>(select);
-                    await state.MsCtxt.Cmd.DeleteAsync("scripts", scriptValues);
+                    var scriptValues = await state.MsCtxt.ExecListAsync<object>(select).ConfigureAwait(false);
+                    await state.MsCtxt.Cmd.DeleteAsync("scripts", scriptValues).ConfigureAwait(false);
                 }
 
-                await state.MsCtxt.Cmd.DeleteAsync("users", await state.MsCtxt.GetRowValueAsync("users", userId));
-                await Session.ForceUserOutAsync(state, userId);
+                await state.MsCtxt.Cmd.DeleteAsync("users", await state.MsCtxt.GetRowValueAsync("users", userId).ConfigureAwait(false)).ConfigureAwait(false);
+                await Session.ForceUserOutAsync(state, userId).ConfigureAwait(false);
             }
         }
 
@@ -225,9 +225,9 @@ namespace metascript
             select.AddParam("@tokenQuery", tokenQuery);
             if (onlyBlocked)
                 select.AddParam("@notBlocked", 0.0);
-            using (var reader = await ctxt.ExecSelectAsync(select))
+            using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
             {
-                while (await reader.ReadAsync())
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     User user =
                         new User()
@@ -247,40 +247,40 @@ namespace metascript
 
         public static async Task BlockUserAsync(HttpState state, string email, int blockSet = 1)
         {
-            long userId = await GetUserIdFromEmailAsync(state.MsCtxt, email);
+            long userId = await GetUserIdFromEmailAsync(state.MsCtxt, email).ConfigureAwait(false);
             if (userId < 0)
                 throw new UserException("User to block not found: " + email);
 
             if (blockSet > 0)
-                await Session.ForceUserOutAsync(state, userId);
+                await Session.ForceUserOutAsync(state, userId).ConfigureAwait(false);
 
-            string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId)).ToString();
+            string userKey = (await state.MsCtxt.GetRowValueAsync("users", userId).ConfigureAwait(false)).ToString();
             var define = new Define("users", userKey);
             define.Set("blocked", blockSet);
-            await state.MsCtxt.Cmd.DefineAsync(define);
+            await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
         }
 
         public static async Task UnblockUserAsync(HttpState state, string email)
         {
-            await BlockUserAsync(state, email, 0);
+            await BlockUserAsync(state, email, 0).ConfigureAwait(false);
         }
 
         public static async Task<bool> IsNameTakenAsync(HttpState state, string name)
         {
             var select = Sql.Parse("SELECT id FROM usednames WHERE value = @name");
             select.cmdParams = new Dictionary<string, object>() { { "@name", name.ToLower() } };
-            return await state.MsCtxt.ExecScalar64Async(select) >= 0;
+            return await state.MsCtxt.ExecScalar64Async(select).ConfigureAwait(false) >= 0;
         }
 
         public static async Task RecordNameTakenAsync(HttpState state, string name)
         {
             var define = new Define("usednames", name.ToLower());
-            await state.MsCtxt.Cmd.DefineAsync(define);
+            await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
         }
 
         public static async Task UnrecordNameTakenAsync(HttpState state, string name)
         {
-            await state.MsCtxt.Cmd.DeleteAsync("usednames", name.ToLower());
+            await state.MsCtxt.Cmd.DeleteAsync("usednames", name.ToLower()).ConfigureAwait(false);
         }
     }
 }

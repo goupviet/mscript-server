@@ -10,14 +10,14 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state);
+            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
             if (state.UserId < 0)
                 throw new UserException("Sorry, you need to be logged in to rename scripts");
 
             string oldName = state.HttpCtxt.Request.QueryString["oldName"];
             string newName = state.HttpCtxt.Request.QueryString["newName"];
 
-            await Script.RenameScriptAsync(state, state.UserId, oldName, newName);
+            await Script.RenameScriptAsync(state, state.UserId, oldName, newName).ConfigureAwait(false);
         }
     }
 }

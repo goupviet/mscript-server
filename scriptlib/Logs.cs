@@ -23,12 +23,12 @@ namespace metascript
     {
         public static async Task LogTraceAsync(Context ctxt, string msg, LogContext logCtxt)
         {
-            await LogAsync(ctxt, LogLevel.TRACE, msg, logCtxt);
+            await LogAsync(ctxt, LogLevel.TRACE, msg, logCtxt).ConfigureAwait(false);
         }
 
         public static async Task LogInfoAsync(Context ctxt, string msg, LogContext logCtxt)
         {
-            await LogAsync(ctxt, LogLevel.INFO, msg, logCtxt);
+            await LogAsync(ctxt, LogLevel.INFO, msg, logCtxt).ConfigureAwait(false);
         }
 
         public static bool ShouldSkip(LogLevel level)
@@ -46,7 +46,7 @@ namespace metascript
             Console.WriteLine($"{Enum.GetName(typeof(LogLevel), level)}: {msg}");
 #endif
             if (level == LogLevel.ERROR)
-                await LogErrorAsync(ctxt, msg, logCtxt);
+                await LogErrorAsync(ctxt, msg, logCtxt).ConfigureAwait(false);
 
             msg = TrimMsg(msg);
 
@@ -56,14 +56,14 @@ namespace metascript
             define.Set("userid", logCtxt.userId);
             define.Set("ip", logCtxt.ip);
             define.Set("msg", msg);
-            await ctxt.Cmd.DefineAsync(define);
+            await ctxt.Cmd.DefineAsync(define).ConfigureAwait(false);
         }
 
         // for use in exception handlers where async is disallowed
         public static async Task LogErrorAsync(Context ctxt, string msg, LogContext logCtxt) 
         {
             EnsureInit();
-            await ErrorLog.LogAsync(ctxt, logCtxt.userId, logCtxt.ip, TrimErrorMsg(msg));
+            await ErrorLog.LogAsync(ctxt, logCtxt.userId, logCtxt.ip, TrimErrorMsg(msg)).ConfigureAwait(false);
         }
 
         private static string TrimMsg(string msg)

@@ -37,7 +37,7 @@ namespace metascript
         {
             EnsureInit();
 
-            await WebUtils.LogInfoAsync(state, $"SendEmail: {toEmail} - {subject}");
+            await WebUtils.LogInfoAsync(state, $"SendEmail: {toEmail} - {subject}").ConfigureAwait(false);
 
             if (!IsEmailValid(toEmail))
                 throw new UserException($"Sorry, that's an invalid email address: {toEmail}");
@@ -45,7 +45,7 @@ namespace metascript
 
             if (!sm_bSendMail)
             {
-                await WebUtils.LogTraceAsync(state, "Not sending email, so this is a no-op");
+                await WebUtils.LogTraceAsync(state, "Not sending email, so this is a no-op").ConfigureAwait(false);
                 return;
             }
 
@@ -100,7 +100,7 @@ namespace metascript
                     Message = msg
                 };
 
-                var response = await client.SendEmailAsync(sendRequest);
+                var response = await client.SendEmailAsync(sendRequest).ConfigureAwait(false);
                 if ((int)response.HttpStatusCode / 100 != 2)
                     throw new Exception($"SendEmail failed: {toEmail} - {subject} - Status Code: {response.HttpStatusCode}");
             }
