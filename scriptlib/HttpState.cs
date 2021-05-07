@@ -47,7 +47,6 @@ namespace metascript
 
         public HttpListenerContext HttpCtxt;
 
-        public long UserId = -1;
         public string ReturnPage;
 
         public bool ReadInput = false;
@@ -136,11 +135,6 @@ namespace metascript
                 await writer.WriteAsync(statusDescription).ConfigureAwait(false);
         }
 
-        public void SetResponseSession(string key)
-        {
-            SetResponseCookie("session", key);
-        }
-
         public async Task FinishWithMessageAsync(string page, string msg)
         {
             SetResponseCookie("message", msg);
@@ -194,9 +188,6 @@ namespace metascript
 
             if (m_responseCookies != null)
             {
-                if (m_responseCookies.ContainsKey("session"))
-                    outputs["session"] = m_responseCookies["session"];
-
                 if (m_responseCookies.ContainsKey("message"))
                     outputs["message"] = m_responseCookies["message"];
             }

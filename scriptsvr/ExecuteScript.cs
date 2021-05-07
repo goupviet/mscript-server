@@ -9,16 +9,12 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
-            if (state.UserId < 0)
-                throw new UserException("Sorry, you need to be logged in to execute scripts");
-
             string scriptName = state.HttpCtxt.Request.QueryString["name"];
             if (string.IsNullOrWhiteSpace(scriptName))
                 throw new UserException("Specify the script you want to run");
             
             await WebUtils.LogTraceAsync(state, "ExecuteScript: {0}", scriptName).ConfigureAwait(false);
-            var scriptText = await Script.GetScriptTextAsync(state, state.UserId, scriptName).ConfigureAwait(false);
+            var scriptText = await Script.GetScriptTextAsync(state, scriptName).ConfigureAwait(false);
             if (scriptText == null) // empty is okay
                 throw new UserException("Sorry, the script was not found");
 

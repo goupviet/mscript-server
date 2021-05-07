@@ -8,8 +8,6 @@ namespace metascript
 {
     public class LogQuery
     {
-        public long userId { get; set; } = -1;
-        public string ip { get; set; }
         public int maxAgeDays { get; set; }
         public string like { get; set; }
         public int maxResults { get; set; }
@@ -19,8 +17,6 @@ namespace metascript
     {
         public string timestamp { get; set; }
         public int level { get; set; }
-        public long userId { get; set; }
-        public string ip { get; set; }
         public string msg { get; set; }
     }
 
@@ -33,20 +29,12 @@ namespace metascript
                 var errorEntries = await ErrorLog.QueryAsync(ctxt, logQuery.like, logQuery.maxAgeDays).ConfigureAwait(false);
                 foreach (var entry in errorEntries)
                 {
-                    if (!string.IsNullOrWhiteSpace(logQuery.ip) && entry.ip != logQuery.ip)
-                        continue;
-
-                    if (logQuery.userId >= 0 && entry.userId != logQuery.userId)
-                        continue;
-
                     output.Add
                     (
                         new LogEntry()
                         {
-                            ip = entry.ip,
                             level = (int)LogLevel.ERROR,
                             timestamp = entry.when.ToString("o"),
-                            userId = entry.userId,
                             msg = entry.msg
                         }
                     );
@@ -56,22 +44,10 @@ namespace metascript
             {
                 Dictionary<string, object> cmdParams = new Dictionary<string, object>();
 
-                string sql = "SELECT logdate, loglevel, userid, ip, msg FROM userlogs";
+                string sql = "SELECT logdate, loglevel, msg FROM userlogs";
 
                 sql += $"\nWHERE created > @logDate";
                 cmdParams.Add("@logDate", DateTime.UtcNow - TimeSpan.FromDays(logQuery.maxAgeDays));
-
-                if (logQuery.userId >= 0)
-                {
-                    sql += $"\nAND userid = @userid";
-                    cmdParams.Add("@userid", logQuery.userId);
-                }
-
-                if (!string.IsNullOrWhiteSpace(logQuery.ip))
-                {
-                    sql += $"\nAND ip = @ip";
-                    cmdParams.Add("@ip", logQuery.ip);
-                }
 
                 if (!string.IsNullOrWhiteSpace(logQuery.like))
                 {
@@ -94,9 +70,7 @@ namespace metascript
                             {
                                 timestamp = reader.GetString(0),
                                 level = (int)reader.GetDouble(1),
-                                userId = (long)reader.GetDouble(2),
-                                ip = reader.GetString(3),
-                                msg = reader.GetString(4)
+                                msg = reader.GetString(2)
                             };
                         output.Add(newEntry);
                     }

@@ -11,100 +11,19 @@ namespace metascript
 
     public class ScriptLib
     {
-        private const string TestUserEmail = "testscripteescripterson914@bletnevergoingtobearealemail.com";
-        private const string TestUserName = "Something Completely Original With No Basis In Reality";
-
-        private User TheTestUser;
-
-        [SetUp]
-        public void Setup()
-        {
-            using (var state = new HttpState(null))
-            {
-                if (User.GetUserIdFromEmailAsync(state.MsCtxt, TestUserEmail).Result >= 0)
-                    User.DeleteUserAsync(state, TestUserEmail).Wait();
-
-                if (User.IsNameTakenAsync(state, TestUserName).Result)
-                    User.UnrecordNameTakenAsync(state, TestUserName).Wait();
-
-                if (User.IsNameTakenAsync(state, TestUserEmail).Result)
-                    User.UnrecordNameTakenAsync(state, TestUserEmail).Wait();
-
-                Assert.IsFalse(User.IsNameTakenAsync(state, TestUserName).Result);
-                Assert.IsFalse(User.IsNameTakenAsync(state, TestUserEmail).Result);
-
-                TheTestUser = User.CreateUserAsync(state, TestUserEmail, TestUserName).Result;
-
-                Assert.IsTrue(User.IsNameTakenAsync(state, TestUserName).Result);
-                Assert.IsTrue(User.IsNameTakenAsync(state, TestUserEmail).Result);
-            }
-        }
-
-        [Test]
-        public void TestUser()
-        {
-            using (var state = new HttpState(null))
-            {
-                var testUserBack = User.GetUserAsync(state.MsCtxt, TheTestUser.Id).Result;
-                Assert.AreEqual(TheTestUser.Id, testUserBack.Id);
-                Assert.AreEqual(TheTestUser.Name, testUserBack.Name);
-                Assert.AreEqual(TheTestUser.Email, testUserBack.Email);
-
-                User.BlockUserAsync(state, TheTestUser.Email, blockSet: 1).Wait();
-                Assert.IsTrue(User.GetUserAsync(state.MsCtxt, TheTestUser.Id).Result.Blocked);
-
-                User.BlockUserAsync(state, TheTestUser.Email, blockSet: 0).Wait();
-                Assert.IsFalse(User.GetUserAsync(state.MsCtxt, TheTestUser.Id).Result.Blocked);
-
-                Assert.AreEqual(TheTestUser.Email, User.GetUserEmailAsync(state.MsCtxt, TheTestUser.Id).Result);
-                Assert.AreEqual(TheTestUser.Name, User.GetUserNameAsync(state.MsCtxt, TheTestUser.Id).Result);
-
-                Assert.AreEqual(TheTestUser.Id, User.GetUserIdFromEmailAsync(state.MsCtxt, TheTestUser.Email).Result);
-                Assert.AreEqual(TheTestUser.Id, User.GetUserIdFromNameAsync(state.MsCtxt, TheTestUser.Name).Result);
-
-                var users = User.GetUsersAsync(state.MsCtxt, TheTestUser.Name, TheTestUser.Email, "", onlyBlocked: false).Result;
-                var userIds = users.Select(u => u.Id).ToHashSet();
-                Assert.IsTrue(userIds.Contains(TheTestUser.Id));
-
-                User.SetLoginTokenAsync(state, TheTestUser).Wait();
-                string loginToken = User.GetUserAsync(state.MsCtxt, TheTestUser.Id).Result.LoginToken;
-
-                var loginUserBack = User.HandleLoginTokenAsync(state, loginToken, TheTestUser.Email).Result;
-                Assert.AreEqual(TheTestUser.Id, loginUserBack.Id);
-                Assert.AreEqual("", User.GetUserAsync(state.MsCtxt, TheTestUser.Id).Result.LoginToken);
-            }
-        }
-
-        [Test]
-        public void TestEmailTokens()
-        {
-            using (var state = new HttpState(null))
-            {
-                string token1 = EmailTokens.CreateEmailTokenAsync(state.MsCtxt, TestUserEmail).Result;
-                string token2 = EmailTokens.LookupEmailTokenAsync(state.MsCtxt, TestUserEmail).Result;
-                Assert.AreEqual(token1, token2);
-
-                string token3 = EmailTokens.CreateEmailTokenAsync(state.MsCtxt, TestUserEmail).Result;
-                string signature = EmailTokens.ComputeSignatureAsync(state, TestUserEmail, token3).Result;
-                EmailTokens.ValidateRequestAsync(state, TestUserEmail, signature).Wait();
-            }
-        }
-
         [Test]
         public void TestLogs()
         {
             using (var state = new HttpState(null))
             {
-                var logCtxt = new LogContext() { ip = "0.0.0.0", userId = TheTestUser.Id };
-
                 string traceMsg = "Test Trace Message " + Guid.NewGuid();
-                Logs.LogTraceAsync(state.MsCtxt, traceMsg, logCtxt).Wait();
+                Logs.LogTraceAsync(state.MsCtxt, traceMsg).Wait();
 
                 string infoMsg = "Test Info Message " + Guid.NewGuid();
-                Logs.LogAsync(state.MsCtxt, LogLevel.INFO, infoMsg, logCtxt).Wait();
+                Logs.LogAsync(state.MsCtxt, LogLevel.INFO, infoMsg).Wait();
 
                 string errorMsg = "Test Error Message " + Guid.NewGuid();
-                Logs.LogErrorAsync(state.MsCtxt, errorMsg, logCtxt).Wait();
+                Logs.LogErrorAsync(state.MsCtxt, errorMsg).Wait();
 
                 Assert.IsFalse(Logs.ShouldSkip(LogLevel.ERROR));
 
@@ -112,16 +31,13 @@ namespace metascript
                 var logQuery =
                     new LogQuery()
                     {
-                        ip = "0.0.0.0",
                         maxAgeDays = 1000,
                         maxResults = 100000,
-                        userId = TheTestUser.Id,
                         like = "%"
                     };
                 var results = LogEntries.GetLogEntriesAsync(state.MsCtxt, logQuery).Result;
                 foreach (var result in results)
                 {
-                    Assert.AreEqual("0.0.0.0", result.ip);
                     if (result.msg == traceMsg) traceFound = true;
                     if (result.msg == infoMsg) infoFound = true;
                     if (result.msg == errorMsg) errorFound = true;
@@ -141,51 +57,33 @@ namespace metascript
                     new Script()
                     {
                         id = -1,
-                        userId = TheTestUser.Id,
                         name = "Test Script " + Guid.NewGuid(),
                         text = ">> Hello world!"
                     };
                 Script.SaveScriptAsync(state, testScript).Wait();
 
                 Script gottenScript = Script.GetScriptAsync(state.MsCtxt, testScript.id).Result;
-                Assert.AreEqual(testScript.userId, gottenScript.userId);
                 Assert.AreEqual(testScript.name, gottenScript.name);
 
                 string gottenScriptText =
-                    Script.GetScriptTextAsync(state, testScript.userId, testScript.name).Result;
+                    Script.GetScriptTextAsync(state, testScript.name).Result;
                 
                 Assert.AreEqual(testScript.text, gottenScriptText);
 
-                var userScripts = Script.GetUserScriptNamesAsync(state, TheTestUser.Id).Result;
+                var userScripts = Script.GetScriptNamesAsync(state).Result;
                 Assert.AreEqual(1, userScripts.Count);
                 Assert.AreEqual(testScript.name, userScripts[0]);
 
-                Script.RenameScriptAsync(state, TheTestUser.Id, testScript.name, testScript.name + " Renamed").Wait();
-                long newScriptId = Script.GetScriptIdAsync(state.MsCtxt, TheTestUser.Name, testScript.name + " Renamed").Result;
+                Script.RenameScriptAsync(state, testScript.name, testScript.name + " Renamed").Wait();
+                long newScriptId = Script.GetScriptIdAsync(state.MsCtxt, testScript.name + " Renamed").Result;
                 Script gottenScript2 = Script.GetScriptAsync(state.MsCtxt, newScriptId).Result;
-                Assert.AreEqual(testScript.userId, gottenScript2.userId);
                 Assert.AreEqual(testScript.name + " Renamed", gottenScript2.name);
-                string scriptText2 = Script.GetScriptTextAsync(state, TheTestUser.Id, gottenScript2.name).Result;
+                string scriptText2 = Script.GetScriptTextAsync(state, gottenScript2.name).Result;
                 Assert.AreEqual(testScript.text, scriptText2);
 
-                Script.DeleteScriptAsync(state, TheTestUser.Id, testScript.name + " Renamed").Wait();
-                var userScripts2 = Script.GetUserScriptNamesAsync(state, TheTestUser.Id).Result;
+                Script.DeleteScriptAsync(state, testScript.name + " Renamed").Wait();
+                var userScripts2 = Script.GetScriptNamesAsync(state).Result;
                 Assert.AreEqual(0, userScripts2.Count);
-            }
-        }
-
-        [Test]
-        public void TestSessions()
-        {
-            using (var state = new HttpState(null))
-            {
-                Session.ResetAsync(state.MsCtxt).Wait();
-                Assert.AreEqual(-1, Session.GetSessionAsync(state.MsCtxt, "foobar").Result);
-                string cookie = Session.CreateSessionAsync(state, TheTestUser.Id).Result;
-                Assert.AreEqual(TheTestUser.Id, Session.GetSessionAsync(state.MsCtxt, cookie).Result);
-                Session.ForceUserOutAsync(state, TheTestUser.Id).Wait();
-                Assert.AreEqual(-1, Session.GetSessionAsync(state.MsCtxt, cookie).Result);
-                Session.DeleteSessionAsync(state, cookie).Wait();
             }
         }
 
@@ -193,7 +91,6 @@ namespace metascript
         public void TestDb()
         {
             HttpState State = new HttpState(null);
-            State.UserId = TheTestUser.Id;
 
             Dictionary<string, IScriptContextFunction> Functions = DbScripting.DbFunctions;
             Functions["msdb.drop"].CallAsync(State, new list() { "test_table" }).Wait();

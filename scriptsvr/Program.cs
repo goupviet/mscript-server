@@ -63,8 +63,7 @@ namespace metascript
                             path = path.Substring(0, question);
                         path = path.ToLower();
                     }
-                    Console.WriteLine("Request: {0} - {1} {2}", 
-                                      WebUtils.GetClientIpAddress(state), 
+                    Console.WriteLine("Request: {0} {1}", 
                                       state.HttpCtxt.Request.HttpMethod, 
                                       path);
 
@@ -85,34 +84,6 @@ namespace metascript
 
                         case "getscriptnames":
                             page = new GetScriptNames();
-                            break;
-
-                        case "getloggedinusername":
-                            page = new GetLoggedInUsername();
-                            break;
-
-                        case "registeremail":
-                            page = new RegisterEmail();
-                            break;
-
-                        case "logout":
-                            page = new Logout();
-                            break;
-
-                        case "login":
-                            page = new Login();
-                            break;
-
-                        case "login2":
-                            page = new Login2();
-                            break;
-
-                        case "signup":
-                            page = new SignUp();
-                            break;
-
-                        case "signup2":
-                            page = new SignUp2();
                             break;
 
                         case "deletescript":

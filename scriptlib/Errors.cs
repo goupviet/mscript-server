@@ -23,28 +23,25 @@ namespace metascript
 #if DEBUG
             Console.WriteLine($"ERROR: " + exp);
 #endif
-            string userIp = WebUtils.GetClientIpAddress(state);
-            LogContext logCtxt = new LogContext() { ip = userIp, userId = state.UserId };
-            string errorInfo = GetErrorInfo(state, userIp);
+            string errorInfo = GetErrorInfo(state);
             if (!string.IsNullOrWhiteSpace(state.ReturnPage) && exp is UserException)
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}", logCtxt).ConfigureAwait(false);
+                await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}").ConfigureAwait(false);
                 await state.FinishWithMessageAsync(state.ReturnPage, exp.Message).ConfigureAwait(false);
             }
             else
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}", logCtxt).ConfigureAwait(false);
-                await state.FinishWithMessageAsync(state.ReturnPage, "Sorry, an unexpected error occurred.\n\nTry again later, failing that, email contact@mscript.info for help").ConfigureAwait(false);
+                await Logs.LogErrorAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}").ConfigureAwait(false);
+                await state.FinishWithMessageAsync(state.ReturnPage, "Sorry, an unexpected error occurred.\n\nTry again later.  Failing that, email contact@mscript.info for help").ConfigureAwait(false);
             }
         }
 
-       public static string GetErrorInfo(HttpState state, string userIp)
+       public static string GetErrorInfo(HttpState state)
        {
             string errorInfo =
                 state.HttpCtxt == null
                 ? "non-HTTP" 
                 : $"{state.HttpCtxt.Request.Url.Segments.Last()}{state.HttpCtxt.Request.Url.Query}";
-            errorInfo += $": {userIp}: {state.UserId}";
             return errorInfo;
         }
     }

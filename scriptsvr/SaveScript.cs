@@ -10,10 +10,6 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            state.UserId = await WebUtils.GetLoggedInUserIdAsync(state).ConfigureAwait(false);
-            if (state.UserId < 0)
-                throw new UserException("Sorry, you need to be logged in to save scripts");
-
             string scriptName = state.HttpCtxt.Request.QueryString["name"];
             if (string.IsNullOrWhiteSpace(scriptName))
                 throw new UserException("Specify the script you want to save");
@@ -25,7 +21,6 @@ namespace metascript
                 state, 
                 new Script() 
                 { 
-                    userId = state.UserId,
                     name = scriptName, 
                     text = scriptText
                 }

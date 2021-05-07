@@ -37,7 +37,7 @@ namespace metascript
             new Dictionary<string, IScriptContextFunction>()
             {
                 { "msdb.define", new DbFunction("msdb.define", new List<string>() { "table_name", "key_value", "[column_data_index]" })},
-                { "msdb.delete", new DbFunction("msdb.delete", new List<string>() { "table_name", "key_value(s)" })},
+                { "msdb.delete", new DbFunction("msdb.delete", new List<string>() { "table_name", "key_values" })},
                 { "msdb.drop", new DbFunction("msdb.drop", new List<string>() { "table_name" })},
                 { "msdb.selectValue", new DbFunction("msdb.selectValue", new List<string>() { "SQL_query", "[parameters_index]" })},
                 { "msdb.selectList", new DbFunction("msdb.selectList", new List<string>() { "SQL_query", "[parameters_index]" })},
@@ -208,7 +208,7 @@ namespace metascript
 
         private static string ScopeTableName(HttpState state, string from)
         {
-            return $"u{state.UserId}_{from}";
+            return $"mscriptUser_{from}";
         }
     }
 }
