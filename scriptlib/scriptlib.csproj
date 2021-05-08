@@ -19,7 +19,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\metastrings2\mslib\mslib.csproj" />
+    <ProjectReference Include="..\..\metastrings\mslib\mslib.csproj" />
     <ProjectReference Include="..\..\mscript-core\scriptcore\scriptcore.csproj" />
   </ItemGroup>
 </Project>

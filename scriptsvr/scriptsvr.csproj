@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\metastrings2\mslib\mslib.csproj" />
+    <ProjectReference Include="..\..\metastrings\mslib\mslib.csproj" />
     <ProjectReference Include="..\..\mscript-core\scriptcore\scriptcore.csproj" />
     <ProjectReference Include="..\scriptlib\scriptlib.csproj" />
   </ItemGroup>
