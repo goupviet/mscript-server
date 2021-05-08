@@ -10,22 +10,6 @@ namespace metascript
 {
     public static class MUtils
     {
-        public static long GetInt64(object obj)
-        {
-            if (obj == null || obj == DBNull.Value)
-                return -1;
-            else
-                return Convert.ToInt64(obj);
-        }
-
-        public static int GetInt32(object obj)
-        {
-            if (obj == null || obj == DBNull.Value)
-                return -1;
-            else
-                return Convert.ToInt32(obj);
-        }
-
         public static string HashStr(string str)
         {
             StringBuilder sb = new StringBuilder(64);
@@ -78,13 +62,6 @@ namespace metascript
             using (var textReader = new StringReader(str))
             using (var jsonReader = new JsonTextReader(textReader))
                 return sm_serializer.Deserialize<T>(jsonReader);
-        }
-
-        public static string CreateToken(int desiredLength)
-        {
-            string token = HashStr($"{Guid.NewGuid()} {DateTime.UtcNow.Ticks} sometimes I like corned beef hash");
-            token = token.Substring(0, Math.Min(token.Length, desiredLength));
-            return token;
         }
 
         private static JsonSerializer sm_serializer = new JsonSerializer();

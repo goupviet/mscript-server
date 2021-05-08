@@ -8,23 +8,12 @@ namespace metascript
     public enum LogLevel
     {
         ERROR = 1,
-        WARNING,
         INFO,
         TRACE
     }
 
     public static class Logs
     {
-        public static async Task LogTraceAsync(Context ctxt, string msg)
-        {
-            await LogAsync(ctxt, LogLevel.TRACE, msg).ConfigureAwait(false);
-        }
-
-        public static async Task LogInfoAsync(Context ctxt, string msg)
-        {
-            await LogAsync(ctxt, LogLevel.INFO, msg).ConfigureAwait(false);
-        }
-
         public static bool ShouldSkip(LogLevel level)
         {
             EnsureInit();
@@ -33,29 +22,25 @@ namespace metascript
 
         public static async Task LogAsync(Context ctxt, LogLevel level, string msg)
         {
-            EnsureInit();
-            if (level == LogLevel.TRACE && !sm_logTrace)
+            if (ShouldSkip(level)) // calls EnsureInit
                 return;
-#if DEBUG
+
             Console.WriteLine($"{Enum.GetName(typeof(LogLevel), level)}: {msg}");
-#endif
+
             if (level == LogLevel.ERROR)
-                await LogErrorAsync(ctxt, msg).ConfigureAwait(false);
+            {
+                await ErrorLog.LogAsync(ctxt, msg).ConfigureAwait(false);
+            }
+            else
+            {
+                msg = TrimMsg(msg);
 
-            msg = TrimMsg(msg);
-
-            var define = new Define("userlogs", Guid.NewGuid().ToString());
-            define.Set("logdate", DateTime.UtcNow.ToString("o"));
-            define.Set("loglevel", level);
-            define.Set("msg", msg);
-            await ctxt.Cmd.DefineAsync(define).ConfigureAwait(false);
-        }
-
-        // for use in exception handlers where async is disallowed
-        public static async Task LogErrorAsync(Context ctxt, string msg) 
-        {
-            EnsureInit();
-            await ErrorLog.LogAsync(ctxt, -1, "", TrimErrorMsg(msg)).ConfigureAwait(false);
+                var define = new Define("userlogs", Guid.NewGuid().ToString());
+                define.Set("logdate", DateTime.UtcNow.ToString("o"));
+                define.Set("loglevel", level);
+                define.Set("msg", msg);
+                await ctxt.Cmd.DefineAsync(define).ConfigureAwait(false);
+            }
         }
 
         private static string TrimMsg(string msg)
@@ -65,14 +50,7 @@ namespace metascript
             else
                 return msg.Substring(0, cMaxLogMsgLen - "...".Length) + "...";
         }
-
-        private static string TrimErrorMsg(string msg)
-        {
-            if (msg.Length <= cMaxErrorgMsgLen)
-                return msg;
-            else
-                return msg.Substring(0, cMaxErrorgMsgLen - "...".Length) + "...";
-        }
+        private const int cMaxLogMsgLen = 256 - 1;
 
         private static void EnsureInit()
         {
@@ -91,8 +69,5 @@ namespace metascript
         private static object sm_initLock = new object();
 
         private static bool sm_logTrace;
-
-        private const int cMaxLogMsgLen = 256 - 1;
-        private const int cMaxErrorgMsgLen = 64 * 1024 - 1;
     }
 }

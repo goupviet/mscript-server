@@ -20,18 +20,18 @@ namespace metascript
         {
             while (exp.InnerException != null)
                 exp = exp.InnerException;
-#if DEBUG
-            Console.WriteLine($"ERROR: " + exp);
-#endif
+
+            Console.WriteLine($"ERROR: {exp.GetType().FullName}: {exp.Message}");
+            
             string errorInfo = GetErrorInfo(state);
             if (!string.IsNullOrWhiteSpace(state.ReturnPage) && exp is UserException)
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}").ConfigureAwait(false);
+                await ErrorLog.LogAsync(state.MsCtxt, $"User Exception: {errorInfo}: {exp.Message}").ConfigureAwait(false);
                 await state.FinishWithMessageAsync(state.ReturnPage, exp.Message).ConfigureAwait(false);
             }
             else
             {
-                await Logs.LogErrorAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}").ConfigureAwait(false);
+                await ErrorLog.LogAsync(state.MsCtxt, $"EXCEPTION: {errorInfo}: {exp}").ConfigureAwait(false);
                 await state.FinishWithMessageAsync(state.ReturnPage, "Sorry, an unexpected error occurred.\n\nTry again later.  Failing that, email contact@mscript.info for help").ConfigureAwait(false);
             }
         }

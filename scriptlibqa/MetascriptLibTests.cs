@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using NUnit.Framework;
 
@@ -16,18 +15,15 @@ namespace metascript
         {
             using (var state = new HttpState(null))
             {
-                string traceMsg = "Test Trace Message " + Guid.NewGuid();
-                Logs.LogTraceAsync(state.MsCtxt, traceMsg).Wait();
-
                 string infoMsg = "Test Info Message " + Guid.NewGuid();
                 Logs.LogAsync(state.MsCtxt, LogLevel.INFO, infoMsg).Wait();
 
                 string errorMsg = "Test Error Message " + Guid.NewGuid();
-                Logs.LogErrorAsync(state.MsCtxt, errorMsg).Wait();
+                ErrorLog.LogAsync(state.MsCtxt, errorMsg).Wait();
 
                 Assert.IsFalse(Logs.ShouldSkip(LogLevel.ERROR));
 
-                bool traceFound = false, infoFound = false, errorFound = false;
+                bool infoFound = false, errorFound = false;
                 var logQuery =
                     new LogQuery()
                     {
@@ -38,11 +34,9 @@ namespace metascript
                 var results = LogEntries.GetLogEntriesAsync(state.MsCtxt, logQuery).Result;
                 foreach (var result in results)
                 {
-                    if (result.msg == traceMsg) traceFound = true;
                     if (result.msg == infoMsg) infoFound = true;
                     if (result.msg == errorMsg) errorFound = true;
                 }
-                Assert.IsTrue(traceFound);
                 Assert.IsTrue(infoFound);
                 Assert.IsTrue(errorFound);
             }
