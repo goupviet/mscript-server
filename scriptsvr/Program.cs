@@ -26,11 +26,22 @@ namespace metascript
             Console.WriteLine("Port: {0}", port);
 
             HttpListener listener = new HttpListener();
-            listener.Prefixes.Add($"http://*:{port}/");
-            listener.Start();
+            listener.Prefixes.Add($"http://localhost:{port}/");
+            try
+            {
+                listener.Start();
+            }
+            catch
+            {
+                Console.WriteLine("Starting listening failed, probably already running, bailing");
+                return;
+            }
             while (true)
             {
                 var ctxt = listener.GetContext();
+                if (!ctxt.Request.IsLocal)
+                    continue;
+
                 Task.Run(async () => await HandleClientAsync(ctxt).ConfigureAwait(false));
             }
         }
