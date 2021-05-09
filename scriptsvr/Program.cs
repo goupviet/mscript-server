@@ -105,8 +105,12 @@ namespace metascript
                             page = new RenameScript();
                             break;
 
+                        case "geterrorlog":
+                            page = new GetErrorLog();
+                            break;
+
                         default:
-                            await WebUtils.LogInfoAsync(state, $"Page not found: {path}").ConfigureAwait(false);
+                            await ErrorLog.LogAsync(state.MsCtxt, $"Page not found: {path}").ConfigureAwait(false);
                             httpCtxt.Response.StatusCode = 404;
                             return;
                     }

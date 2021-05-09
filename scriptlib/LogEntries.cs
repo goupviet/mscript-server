@@ -16,7 +16,6 @@ namespace metascript
     public class LogEntry
     {
         public string timestamp { get; set; }
-        public int level { get; set; }
         public string msg { get; set; }
     }
 
@@ -33,7 +32,6 @@ namespace metascript
                     (
                         new LogEntry()
                         {
-                            level = (int)LogLevel.ERROR,
                             timestamp = entry.when.ToString("o"),
                             msg = entry.msg
                         }
@@ -41,43 +39,6 @@ namespace metascript
                 }
             }
 
-            {
-                Dictionary<string, object> cmdParams = new Dictionary<string, object>();
-
-                string sql = "SELECT logdate, loglevel, msg FROM userlogs";
-
-                sql += $"\nWHERE created > @logDate";
-                cmdParams.Add("@logDate", DateTime.UtcNow - TimeSpan.FromDays(logQuery.maxAgeDays));
-
-                if (!string.IsNullOrWhiteSpace(logQuery.like))
-                {
-                    sql += $"\nAND msg LIKE @like";
-                    cmdParams.Add("@like", logQuery.like);
-                }
-
-                sql += "\nORDER BY logdate DESC";
-                sql += "\nLIMIT " + logQuery.maxResults;
-
-                var select = Sql.Parse(sql);
-                select.cmdParams = cmdParams;
-
-                using (var reader = await ctxt.ExecSelectAsync(select).ConfigureAwait(false))
-                {
-                    while (await reader.ReadAsync().ConfigureAwait(false))
-                    {
-                        var newEntry =
-                            new LogEntry()
-                            {
-                                timestamp = reader.GetString(0),
-                                level = (int)reader.GetDouble(1),
-                                msg = reader.GetString(2)
-                            };
-                        output.Add(newEntry);
-                    }
-                }
-            }
-
-            output.Sort((a, b) => a.timestamp.CompareTo(b.timestamp));
             return output;
         }
     }

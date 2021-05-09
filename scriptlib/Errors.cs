@@ -36,7 +36,7 @@ namespace metascript
             }
         }
 
-       public static string GetErrorInfo(HttpState state)
+       private static string GetErrorInfo(HttpState state)
        {
             string errorInfo =
                 state.HttpCtxt == null

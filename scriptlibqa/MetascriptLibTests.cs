@@ -15,15 +15,10 @@ namespace metascript
         {
             using (var state = new HttpState(null))
             {
-                string infoMsg = "Test Info Message " + Guid.NewGuid();
-                Logs.LogAsync(state.MsCtxt, LogLevel.INFO, infoMsg).Wait();
-
                 string errorMsg = "Test Error Message " + Guid.NewGuid();
                 ErrorLog.LogAsync(state.MsCtxt, errorMsg).Wait();
 
-                Assert.IsFalse(Logs.ShouldSkip(LogLevel.ERROR));
-
-                bool infoFound = false, errorFound = false;
+                bool errorFound = false;
                 var logQuery =
                     new LogQuery()
                     {
@@ -34,10 +29,9 @@ namespace metascript
                 var results = LogEntries.GetLogEntriesAsync(state.MsCtxt, logQuery).Result;
                 foreach (var result in results)
                 {
-                    if (result.msg == infoMsg) infoFound = true;
-                    if (result.msg == errorMsg) errorFound = true;
+                   if (result.msg == errorMsg) 
+                        errorFound = true;
                 }
-                Assert.IsTrue(infoFound);
                 Assert.IsTrue(errorFound);
             }
         }

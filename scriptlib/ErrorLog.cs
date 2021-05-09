@@ -27,10 +27,13 @@ namespace metascript
             msg = TrimErrorMsg(msg);
 
             string logKey = Guid.NewGuid().ToString();
+
             Define define = new Define("errorlog", logKey);
             define.Set("when", DateTime.UtcNow.ToString("o"));
             await ctxt.Cmd.DefineAsync(define).ConfigureAwait(false);
+
             long logId = await ctxt.GetRowIdAsync("errorlog", logKey).ConfigureAwait(false);
+
             await ctxt.Cmd.PutLongStringAsync
             (
                 new LongStringPut()

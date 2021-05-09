@@ -12,7 +12,6 @@ namespace metascript
                 throw new UserException("Specify the script you want to get");
 
             string scriptText = await Script.GetScriptTextAsync(state, scriptName).ConfigureAwait(false);
-            await WebUtils.LogTraceAsync(state, "GetScriptText: len = {0}", scriptText.Length).ConfigureAwait(false);
             if (string.IsNullOrEmpty(scriptText))
                 return;
 

@@ -13,7 +13,6 @@ namespace metascript
             if (string.IsNullOrWhiteSpace(scriptName))
                 throw new UserException("Specify the script you want to run");
             
-            await WebUtils.LogTraceAsync(state, "ExecuteScript: {0}", scriptName).ConfigureAwait(false);
             var scriptText = await Script.GetScriptTextAsync(state, scriptName).ConfigureAwait(false);
             if (scriptText == null) // empty is okay
                 throw new UserException("Sorry, the script was not found");
@@ -46,9 +45,10 @@ namespace metascript
                 {
                     await stream.WriteAsync
                     (
-                        $"\nERROR: {collectedExp.Message}\n" +
-                        $"Line {collectedExp.LineNumber}:\n" +
-                        $"{collectedExp.Line}\n"
+                        $"\n" +
+                        $"ERROR: {collectedExp.Message}\n" +
+                        $"Line {collectedExp.LineNumber}\n" +
+                        $"{collectedExp.Line}"
                     ).ConfigureAwait(false);
                 }
             }

@@ -77,7 +77,6 @@ namespace metascript
 
         public static async Task SaveScriptAsync(HttpState state, Script script)
         {
-            await WebUtils.LogTraceAsync(state, "SaveScript: {0}", script.name).ConfigureAwait(false);
             var define = new Define("scripts", script.name);
             define.Set("name", script.name);
             await state.MsCtxt.Cmd.DefineAsync(define).ConfigureAwait(false);
@@ -100,7 +99,6 @@ namespace metascript
 
         public static async Task RenameScriptAsync(HttpState state, string oldName, string newName)
         {
-            await WebUtils.LogInfoAsync(state, $"RenameScript: {oldName} -> {newName}").ConfigureAwait(false);
             if (oldName == newName)
                 throw new UserException("You cannot set a script title to its current value.");
 
@@ -117,7 +115,6 @@ namespace metascript
 
         public static async Task DeleteScriptAsync(HttpState state, string name)
         {
-            await WebUtils.LogInfoAsync(state, $"DeleteScript: {name}").ConfigureAwait(false);
             string key = name;
             await state.MsCtxt.Cmd.DeleteAsync("scripts", key).ConfigureAwait(false);
         }
