@@ -32,8 +32,4 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="&quot;$(SolutionDir)stage-server.bat&quot;" />
-  </Target>
-
 </Project>
