@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using System.Text;
 using System.Net;
+using System.IO;
+using System.Diagnostics;
 
 namespace metascript
 {
@@ -25,22 +27,52 @@ namespace metascript
             */
             Console.WriteLine("Port: {0}", port);
 
+            try
+            {
+                Console.Write("Getting processes...");
+                var processes = Process.GetProcesses();
+                Console.WriteLine($" {processes.Length} found");
+                foreach (var process in processes)
+                {
+                    if (Path.GetFileNameWithoutExtension(process.ProcessName) == "scriptsvr")
+                    {
+                        if (process.Id != Process.GetCurrentProcess().Id)
+                        {
+                            Console.WriteLine($"Killing process {process.Id}");
+                            process.Kill(true);
+                        }
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                Console.WriteLine("Killing existing processes failed, bailing");
+                Console.WriteLine($"{exp.GetType().FullName}: {exp.Message}");
+                return;
+            }
+
+            Console.WriteLine("Listening...");
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add($"http://localhost:{port}/");
             try
             {
                 listener.Start();
             }
-            catch
+            catch (Exception exp)
             {
-                Console.WriteLine("Starting listening failed, probably already running, bailing");
+                Console.WriteLine("Starting listening failed, bailing");
+                Console.WriteLine($"{exp.GetType().FullName}: {exp.Message}");
                 return;
             }
+            Console.WriteLine("Processing...");
             while (true)
             {
                 var ctxt = listener.GetContext();
                 if (!ctxt.Request.IsLocal)
+                {
+                    Console.WriteLine("Ignoring non-local request");
                     continue;
+                }
 
                 Task.Run(async () => await HandleClientAsync(ctxt).ConfigureAwait(false));
             }
