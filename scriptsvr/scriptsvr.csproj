@@ -25,11 +25,4 @@
     <ProjectReference Include="..\..\mscript-core\scriptcore\scriptcore.csproj" />
     <ProjectReference Include="..\scriptlib\scriptlib.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="App.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.IO;
-using System.Configuration;
 
 using Newtonsoft.Json;
 
@@ -20,33 +19,6 @@ namespace metascript
                     sb.Append(theByte.ToString("X2"));
             }
             return sb.ToString();
-        }
-
-        public static string GetAppSetting(string key)
-        {
-            return ConfigurationManager.AppSettings[key] ?? "";
-        }
-
-        public static int GetAppSettingInt(string key)
-        {
-            string setting = GetAppSetting(key);
-
-            int val;
-            if (!int.TryParse(setting, out val))
-                throw new MException($"Invalid/Missing int config setting: {key} - {setting}");
-
-            return val;
-        }
-
-        public static bool GetAppSettingBool(string key)
-        {
-            string setting = GetAppSetting(key);
-
-            bool val;
-            if (!bool.TryParse(setting, out val))
-                throw new MException($"Invalid/Missing bool config setting: {key} - {setting}");
-
-            return val;
         }
 
         public static string ObjectToString(object obj)

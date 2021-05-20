@@ -6,6 +6,12 @@ namespace metascript
 {
     public class ErrorLogTests
     {
+        [SetUp]
+        public void Setup()
+        {
+            HttpState.DbConnStr = "Data Source=[UserRoaming]mscript-tests.db";
+        }
+
         [Test]
         public void TestErrorLog()
         {

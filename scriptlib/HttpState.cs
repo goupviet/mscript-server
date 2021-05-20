@@ -17,6 +17,9 @@ namespace metascript
         public HttpState(HttpListenerContext httpCtxt)
         {
             HttpCtxt = httpCtxt;
+
+            if (string.IsNullOrWhiteSpace(DbConnStr))
+                throw new MException("Database connection string not provided");
         }
 
         public void Dispose()
@@ -34,12 +37,14 @@ namespace metascript
             }
         }
 
+        public static string DbConnStr;
+
         public Context MsCtxt
         {
             get
             {
                 if (m_msCtxt == null)
-                    m_msCtxt = new Context();
+                    m_msCtxt = new Context(DbConnStr);
                 return m_msCtxt;
             }
         }

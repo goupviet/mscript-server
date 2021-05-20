@@ -10,6 +10,12 @@ namespace metascript
 
     public class ScriptLib
     {
+        [SetUp]
+        public void Setup()
+        {
+            HttpState.DbConnStr = "Data Source=[UserRoaming]mscript-tests.db";
+        }
+
         [Test]
         public void TestLogs()
         {
