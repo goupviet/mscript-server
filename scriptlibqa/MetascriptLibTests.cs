@@ -13,7 +13,7 @@ namespace metascript
         [SetUp]
         public void Setup()
         {
-            HttpState.DbConnStr = "Data Source=[UserRoaming]mscript-tests.db";
+            HttpState.DbConnStr = "Data Source=[UserRoaming]/mscript-tests.db";
         }
 
         [Test]

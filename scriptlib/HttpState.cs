@@ -44,7 +44,11 @@ namespace metascript
             get
             {
                 if (m_msCtxt == null)
+                {
+                    if (string.IsNullOrWhiteSpace(DbConnStr))
+                        throw new MException("HttpState.DbConnStr not set");
                     m_msCtxt = new Context(DbConnStr);
+                }
                 return m_msCtxt;
             }
         }
@@ -52,9 +56,7 @@ namespace metascript
 
         public HttpListenerContext HttpCtxt;
 
-        public string ReturnPage;
-
-        public bool ReadInput = false;
+        public bool ReadInputYet = false;
         public bool WrittenOutput = false;
 
         public async Task WriteResponseAsync(string str)
@@ -92,113 +94,35 @@ namespace metascript
             if (HttpCtxt == null || HttpCtxt.Request.HttpMethod != "POST")
                 return "";
 
-            if (ReadInput)
+            if (ReadInputYet)
                 throw new MException("Input already read");
-            ReadInput = true;
+            ReadInputYet = true;
 
             using (var reader = new StreamReader(HttpCtxt.Request.InputStream, leaveOpen: true))
                 m_requestPost = await reader.ReadToEndAsync().ConfigureAwait(false);
             return m_requestPost;
         }
-        public string m_requestPost;
+        private string m_requestPost;
 
-        public async Task<Dictionary<string, string>> GetRequestFieldsAsync()
-        {
-            if (m_requestFields == null)
-            {
-                if (ReadInput)
-                    throw new MException("Input already read");
-                ReadInput = true;
-
-                string json;
-                if (HttpCtxt == null)
-                {
-                    json = "{}";
-                }
-                else
-                {
-                    using (var reader = new StreamReader(HttpCtxt.Request.InputStream, leaveOpen: true))
-                        json = await reader.ReadToEndAsync().ConfigureAwait(false);
-                }
-
-                m_requestFields = MUtils.StringToObject<Dictionary<string, string>>(json);
-            }
-            return m_requestFields;
-        }
-        private Dictionary<string, string> m_requestFields;
-
-        public async Task SetFinalStatusAsync(int statusCode, string statusDescription)
+        public async Task FinishWithMessageAsync(string message)
         {
             if (WrittenOutput)
                 return; // too late
             WrittenOutput = true;
 
-            HttpCtxt.Response.ContentType = "text/plain";
-            HttpCtxt.Response.StatusCode = statusCode;
-
-            using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(statusDescription).ConfigureAwait(false);
-        }
-
-        public async Task FinishWithMessageAsync(string page, string msg)
-        {
-            SetResponseCookie("message", msg);
-            await FinishAsync(page).ConfigureAwait(false);
-        }
-
-        private void SetResponseCookie(string name, string value)
-        {
-            if (m_responseCookies == null)
-                m_responseCookies = new Dictionary<string, string>();
-            m_responseCookies[name] = value;
-        }
-        private Dictionary<string, string> m_responseCookies;
-
-        public async Task FinishAsync(string page)
-        {
-            if (WrittenOutput)
-                return; // too late
-            WrittenOutput = true;
-
-            string payload = GetFinishPayload(page);
-
-            using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(payload).ConfigureAwait(false);
-
-            throw new PageFinishException();
-        }
-
-        public void Finish(string page)
-        {
-            if (WrittenOutput)
-                return; // too late
-            WrittenOutput = true;
-
-            string payload = GetFinishPayload(page);
-
-            using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-               writer.Write(payload);
-
-            throw new PageFinishException();
-        }
-
-        private string GetFinishPayload(string page)
-        {
             HttpCtxt.Response.ContentType = "application/json";
 
             var outputs = new Dictionary<string, string>();
 
             outputs["ajaxFinish"] = "true";
-            outputs["redirect"] = page;
+            outputs["message"] = message;
 
-            if (m_responseCookies != null)
-            {
-                if (m_responseCookies.ContainsKey("message"))
-                    outputs["message"] = m_responseCookies["message"];
-            }
+            string payload = MUtils.ObjectToString(outputs);
 
-            var payload = MUtils.ObjectToString(outputs);
-            return payload;
+            using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
+                await writer.WriteAsync(payload).ConfigureAwait(false);
+
+            throw new PageFinishException();
         }
 
         private static void ParseAjaxCookieJar(string cookieJar, Dictionary<string, string> output)
