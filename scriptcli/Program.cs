@@ -15,16 +15,25 @@ namespace metascript
                 if (args.Length != 2)
                 {
                     Console.WriteLine("Usage: scriptcli <input file path> <-w or output file path>");
-                    Console.WriteLine("Use -w to open the result in a web browser instead of an output file");
+                    Console.WriteLine("Use -w to open the output in a web browser instead of writing it to a file");
                     return 0;
                 }
 
                 HttpState.DbConnStr = "Data Source=[MyDocuments]/mscript/mscript.db";
 
-                string scriptText = File.ReadAllText(args[0], Encoding.UTF8);
+                string inputFilePath = args[0];
+                if (!File.Exists(inputFilePath))
+                {
+                    Console.WriteLine("ERROR: File does not exist: {0}", inputFilePath);
+                    return 1;
+                }
+
+                string scriptText = File.ReadAllText(inputFilePath, Encoding.UTF8);
+
                 var symbols = new SymbolTable();
-                using (HttpState state = new HttpState(null))
+
                 using (var outputStream = new MemoryStream())
+                using (HttpState state = new HttpState(null))
                 using
                 (
                     var processor =
@@ -50,19 +59,14 @@ namespace metascript
 
                     if (collectedExp != null)
                     {
-                        using (var sw = new StreamWriter(outputStream, Encoding.UTF8))
-                        {
-                            sw.Write
-                            (
-                                $"ERROR: {collectedExp.Message}\n" +
-                                $"Line {collectedExp.LineNumber}\n" +
-                                $"{collectedExp.Line}"
-                            );
-                        }
+                        Console.WriteLine($"ERROR: {collectedExp.Message}");
+                        Console.WriteLine($"Line {collectedExp.LineNumber}");
+                        Console.WriteLine($"{collectedExp.Line}");
                         return 1;
                     }
 
-                    if (args[1] == "-w")
+                    string outputOption = args[1];
+                    if (outputOption == "-w")
                     {
                         string tempFilePath = Path.Combine(Path.GetTempPath(), "mscript-temp-output.html");
                         File.WriteAllBytes(tempFilePath, outputStream.ToArray());
@@ -72,7 +76,7 @@ namespace metascript
                     }
                     else
                     {
-                        File.WriteAllBytes(args[1], outputStream.ToArray());
+                        File.WriteAllBytes(outputOption, outputStream.ToArray());
                     }
                     return 0;
                 }
