@@ -11,7 +11,7 @@ namespace metascript
     {
         static void Main(string[] args)
         {
-            HttpState.DbConnStr = "Data Source=[UserRoaming]/mscript.db";
+            HttpState.DbConnStr = "Data Source=[MyDocuments]/mscript/mscript.db";
 
             int port = 16914;
             /* Unused
