@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "scriptcli": {
+      "commandName": "Project",
+      "commandLineArgs": "test.ms -w"
+    }
+  }
+}

@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mslib", "..\metastrings\msl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mstests", "..\metastrings\tests\mstests.csproj", "{DCA81D66-03CB-4359-A055-EB8167C462BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scriptcli", "scriptcli\scriptcli.csproj", "{EB198969-A9CF-413A-A774-951A047F40AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{DCA81D66-03CB-4359-A055-EB8167C462BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCA81D66-03CB-4359-A055-EB8167C462BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCA81D66-03CB-4359-A055-EB8167C462BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB198969-A9CF-413A-A774-951A047F40AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB198969-A9CF-413A-A774-951A047F40AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB198969-A9CF-413A-A774-951A047F40AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB198969-A9CF-413A-A774-951A047F40AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
