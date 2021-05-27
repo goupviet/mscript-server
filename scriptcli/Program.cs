@@ -12,10 +12,11 @@ namespace metascript
         {
             try
             {
-                if (args.Length != 2)
+                if (args.Length == 0)
                 {
-                    Console.WriteLine("Usage: scriptcli <input file path> <-w or output file path>");
+                    Console.WriteLine("Usage: scriptcli <input file path> [-w or output file path]");
                     Console.WriteLine("Use -w to open the output in a web browser instead of writing it to a file");
+                    Console.WriteLine("If no second parameter, the output is written to the console");
                     return 0;
                 }
 
@@ -50,35 +51,42 @@ namespace metascript
                     ScriptException collectedExp = null;
                     try
                     {
-                        await processor.ProcessAsync().ConfigureAwait(false);
+                        await processor.ProcessAsync();
                     }
                     catch (ScriptException exp)
                     {
                         collectedExp = exp;
                     }
 
+                    int retVal = 0;
+
                     if (collectedExp != null)
                     {
                         Console.WriteLine($"ERROR: {collectedExp.Message}");
                         Console.WriteLine($"Line {collectedExp.LineNumber}");
                         Console.WriteLine($"{collectedExp.Line}");
-                        return 1;
+                        Console.WriteLine();
+                        retVal = 1;
                     }
 
-                    string outputOption = args[1];
-                    if (outputOption == "-w")
+                    string outputOption = args.Length >= 2 ? args[1] : null;
+                    if (outputOption == null)
                     {
-                        string tempFilePath = Path.Combine(Path.GetTempPath(), "mscript-temp-output.html");
+                        string outputStr = Encoding.UTF8.GetString(outputStream.ToArray());
+                        Console.WriteLine(outputStr);
+                    }
+                    else if (outputOption == "-w")
+                    {
+                        string tempFilePath = Path.Combine(Path.GetTempPath(), "scriptcli-temp-output.html");
                         File.WriteAllBytes(tempFilePath, outputStream.ToArray());
                         ProcessStartInfo startInfo = new ProcessStartInfo(tempFilePath);
                         startInfo.UseShellExecute = true;
                         Process.Start(startInfo);
                     }
                     else
-                    {
                         File.WriteAllBytes(outputOption, outputStream.ToArray());
-                    }
-                    return 0;
+
+                    return retVal;
                 }
             }
             catch (Exception exp)

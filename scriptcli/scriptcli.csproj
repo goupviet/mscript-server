@@ -23,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="error.ms">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="test.ms">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -15,13 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "scriptqa", "..\mscript-core
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "scripttester", "..\mscript-core\scripttester\scripttester.csproj", "{90779090-467D-4FAC-BB77-1ACEFA02CEF0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "scriptcmd", "scriptcmd\scriptcmd.csproj", "{F4C45681-F7EF-44F1-8E89-E768E63D82CF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mslib", "..\metastrings\mslib\mslib.csproj", "{D9028DB7-1BCB-4200-8016-F0C06657705D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mstests", "..\metastrings\tests\mstests.csproj", "{DCA81D66-03CB-4359-A055-EB8167C462BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scriptcli", "scriptcli\scriptcli.csproj", "{EB198969-A9CF-413A-A774-951A047F40AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "scriptcli", "scriptcli\scriptcli.csproj", "{EB198969-A9CF-413A-A774-951A047F40AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +51,6 @@ Global
 		{90779090-467D-4FAC-BB77-1ACEFA02CEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90779090-467D-4FAC-BB77-1ACEFA02CEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90779090-467D-4FAC-BB77-1ACEFA02CEF0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F4C45681-F7EF-44F1-8E89-E768E63D82CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F4C45681-F7EF-44F1-8E89-E768E63D82CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F4C45681-F7EF-44F1-8E89-E768E63D82CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F4C45681-F7EF-44F1-8E89-E768E63D82CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D9028DB7-1BCB-4200-8016-F0C06657705D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D9028DB7-1BCB-4200-8016-F0C06657705D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9028DB7-1BCB-4200-8016-F0C06657705D}.Release|Any CPU.ActiveCfg = Release|Any CPU
