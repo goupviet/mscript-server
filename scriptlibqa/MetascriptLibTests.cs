@@ -29,10 +29,9 @@ namespace metascript
                     new LogQuery()
                     {
                         maxAgeDays = 1000,
-                        maxResults = 100000,
-                        like = "%"
+                        maxResults = 100000
                     };
-                var results = LogEntries.GetLogEntriesAsync(state.MsCtxt, logQuery).Result;
+                var results = ErrorLogEntries.GetErrorLogsAsync(state.MsCtxt, logQuery).Result;
                 foreach (var result in results)
                 {
                    if (result.msg == errorMsg) 

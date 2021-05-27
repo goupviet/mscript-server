@@ -7,8 +7,16 @@ using Newtonsoft.Json;
 
 namespace metascript
 {
+    /// <summary>
+    /// Utility functions for getting things done.
+    /// </summary>
     public static class MUtils
     {
+        /// <summary>
+        /// SHA-256 wrapper.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static string HashStr(string str)
         {
             StringBuilder sb = new StringBuilder(64);
@@ -21,6 +29,9 @@ namespace metascript
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Object => JSON
+        /// </summary>
         public static string ObjectToString(object obj)
         {
             StringBuilder sb = new StringBuilder();
@@ -29,6 +40,9 @@ namespace metascript
             return sb.ToString();
         }
 
+        /// <summary>
+        /// JSON => Object
+        /// </summary>
         public static T StringToObject<T>(string str)
         {
             using (var textReader = new StringReader(str))

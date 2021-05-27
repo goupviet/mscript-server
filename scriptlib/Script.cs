@@ -6,12 +6,18 @@ using metastrings;
 
 namespace metascript
 {
+    /// <summary>
+    /// Central class for representing a script.
+    /// </summary>
     public class Script
     {
         public long id { get; set; }
         public string name { get; set; }
         public string text { get; set; }
 
+        /// <summary>
+        /// Given a script ID, get a script, or an exception.
+        /// </summary>
         public static async Task<Script> GetScriptAsync(Context ctxt, long scriptId)
         {
             var select = Sql.Parse($"SELECT name FROM scripts WHERE id = @scriptId");
@@ -44,6 +50,9 @@ namespace metascript
             return script;
         }
 
+        /// <summary>
+        /// Get the names of all the user's scripts.
+        /// </summary>
         public static async Task<List<string>> GetScriptNamesAsync(HttpState state)
         {
             var select = Sql.Parse($"SELECT name FROM scripts");
@@ -51,6 +60,12 @@ namespace metascript
             return scriptNames;
         }
 
+        /// <summary>
+        /// Get the text of a script.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static async Task<string> GetScriptTextAsync(HttpState state, string name)
         {
             long scriptId;
@@ -75,6 +90,9 @@ namespace metascript
             return text;
         }
 
+        /// <summary>
+        /// Save a script to the database.
+        /// </summary>
         public static async Task SaveScriptAsync(HttpState state, Script script)
         {
             var define = new Define("scripts", script.name);
@@ -97,6 +115,9 @@ namespace metascript
             }
         }
 
+        /// <summary>
+        /// Rename a script...carefully.
+        /// </summary>
         public static async Task RenameScriptAsync(HttpState state, string oldName, string newName)
         {
             if (oldName == newName)
@@ -113,12 +134,18 @@ namespace metascript
             await DeleteScriptAsync(state, oldName).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Delete a script.
+        /// </summary>
         public static async Task DeleteScriptAsync(HttpState state, string name)
         {
             string key = name;
             await state.MsCtxt.Cmd.DeleteAsync("scripts", key).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Get the database ID of a script.
+        /// </summary>
         public static async Task<long> GetScriptIdAsync(Context ctxt, string name)
         {
             var select = Sql.Parse("SELECT id FROM scripts WHERE name = @name");

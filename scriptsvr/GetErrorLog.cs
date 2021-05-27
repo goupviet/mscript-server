@@ -10,7 +10,7 @@ namespace metascript
         {
             int num = 0;
             StringBuilder sb = new StringBuilder();
-            foreach (var logEntry in await ErrorLog.QueryAsync(state.MsCtxt, "%", 30).ConfigureAwait(false))
+            foreach (var logEntry in await ErrorLog.QueryAsync(state.MsCtxt, 30).ConfigureAwait(false))
             {
                 ++num;
                 sb.AppendLine($"{num}. {logEntry.when} - {logEntry.msg}");

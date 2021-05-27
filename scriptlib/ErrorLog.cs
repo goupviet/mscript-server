@@ -6,6 +6,9 @@ using metastrings;
 
 namespace metascript
 {
+    /// <summary>
+    /// How do we represent a single log entry?
+    /// </summary>
     public class ErrorLogEntry
     {
         public DateTime when { get; set; }
@@ -50,37 +53,32 @@ namespace metascript
         /// Query for error messages
         /// </summary>
         /// <param name="ctxt">Database connection</param>
-        /// <param name="likePattern">Log messages query</param>
         /// <param name="maxDaysOld">How far back to go in time</param>
         /// <returns></returns>
-        public static async Task<List<ErrorLogEntry>> QueryAsync(Context ctxt, string likePattern, int maxDaysOld)
+        public static async Task<List<ErrorLogEntry>> QueryAsync(Context ctxt, int maxDaysOld)
         {
             var output = new List<ErrorLogEntry>();
-            string sql = "SELECT id, created FROM errorlog WHERE created > @since ORDER BY created DESC";
+            string sql = "SELECT id, created FROM errorlog WHERE created > @since ORDER BY id DESC";
             var select = Sql.Parse(sql);
             select.AddParam("@since", DateTime.UtcNow - TimeSpan.FromDays(maxDaysOld));
-            List<long> itemIds = await ctxt.ExecListAsync<long>(select).ConfigureAwait(false);
-            foreach (long itemId in itemIds)
+            metastrings.ListDictionary<long, DateTime> itemIds = 
+                await ctxt.ExecDictAsync<long, DateTime>(select).ConfigureAwait(false);
+            foreach (var kvp in itemIds.Entries)
             {
+                long itemId = kvp.Key;
+                DateTime created = kvp.Value;
+
                 string logMessage = 
-                    await LongStrings.GetStringAsync(ctxt, itemId, "msg", likePattern).ConfigureAwait(false);
+                    await LongStrings.GetStringAsync(ctxt, itemId, "msg").ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(logMessage))
                     continue;
 
-                var entrySelect = Sql.Parse("SELECT created FROM errorlog WHERE id = @id");
-                entrySelect.AddParam("@id", itemId);
-                using (var reader = await ctxt.ExecSelectAsync(entrySelect).ConfigureAwait(false))
+                var newEntry = new ErrorLogEntry()
                 {
-                    while (await reader.ReadAsync().ConfigureAwait(false))
-                    {
-                        var newEntry = new ErrorLogEntry()
-                        {
-                            when = reader.GetDateTime(0),
-                            msg = logMessage
-                        };
-                        output.Add(newEntry);
-                    }
-                }
+                    when = created,
+                    msg = logMessage
+                };
+                output.Add(newEntry);
             }
             return output;
         }

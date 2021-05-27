@@ -4,11 +4,17 @@ using System.Linq;
 
 namespace metascript
 {
+    /// <summary>
+    /// Exception class for messages to deliver to the user.
+    /// </summary>
     public class UserException : Exception
     {
         public UserException(string msg) : base(msg) { }
     }
 
+    /// <summary>
+    /// Internal exception type.
+    /// </summary>
     public class MException : Exception
     {
         public MException(string msg) : base(msg) { }
@@ -16,6 +22,12 @@ namespace metascript
 
     public static class Errors
     {
+        /// <summary>
+        /// Global error handler that logs errors and finishes pages.
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="exp"></param>
+        /// <returns></returns>
         public static async Task HandleErrorAsync(HttpState state, Exception exp)
         {
             while (exp.InnerException != null)

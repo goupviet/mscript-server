@@ -26,17 +26,21 @@ namespace metascript
                     ErrorLog.LogAsync(ctxt, "blet monkey").Wait();
 
                     {
-                        var logEntries = ErrorLog.QueryAsync(ctxt, "%foo%", 10).Result;
-                        Assert.AreEqual(1, logEntries.Count);
-                        Assert.AreEqual("foo foo bar", logEntries[0].msg);
-                        Assert.IsTrue((DateTime.UtcNow - logEntries[0].when).TotalSeconds < 10);
-                    }
-
-                    {
-                        var logEntries = ErrorLog.QueryAsync(ctxt, "blet%", 10).Result;
-                        Assert.AreEqual(1, logEntries.Count);
-                        Assert.AreEqual("blet monkey", logEntries[0].msg);
-                        Assert.IsTrue((DateTime.UtcNow - logEntries[0].when).TotalSeconds < 10);
+                        var logEntries = ErrorLog.QueryAsync(ctxt, 10).Result;
+                        Assert.AreEqual(2, logEntries.Count);
+                        bool found = false;
+                        DateTime foundDt = DateTime.MinValue;
+                        foreach (var entry in logEntries)
+                        {
+                            if (entry.msg == "foo foo bar")
+                            {
+                                found = true;
+                                foundDt = entry.when;
+                                break;
+                            }
+                        }
+                        Assert.IsTrue(found);
+                        Assert.IsTrue((DateTime.UtcNow - foundDt).TotalSeconds < 10);
                     }
                 }
             }

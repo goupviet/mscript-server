@@ -10,6 +10,9 @@ namespace metascript
     using list = List<object>;
     using index = ListDictionary<object, object>;
 
+    /// <summary>
+    /// Wrapper class for metastrings database function calls.
+    /// </summary>
     public class DbFunction : IScriptContextFunction
     {
         public DbFunction(string name, List<string> paramNames)
@@ -31,6 +34,9 @@ namespace metascript
         private List<string> m_paramNames;
     }
 
+    /// <summary>
+    /// Implementation of metastrings database function calls.
+    /// </summary>
     public static class DbScripting
     {
         public static readonly Dictionary<string, IScriptContextFunction> DbFunctions =

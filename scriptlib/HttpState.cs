@@ -8,12 +8,22 @@ using metastrings;
 
 namespace metascript
 {
+    /// <summary>
+    /// Exception used for taking flow of control up to the program level.
+    /// </summary>
     public class PageFinishException : Exception
     {
     }
 
+    /// <summary>
+    /// Context class for managing many aspects of processing requests.
+    /// </summary>
     public class HttpState : IDisposable
     {
+        /// <summary>
+        /// Take an HTTP listener to interact with, or not, null is fine for test code.
+        /// </summary>
+        /// <param name="httpCtxt"></param>
         public HttpState(HttpListenerContext httpCtxt)
         {
             HttpCtxt = httpCtxt;
@@ -22,6 +32,9 @@ namespace metascript
                 throw new MException("Database connection string not provided");
         }
 
+        /// <summary>
+        /// Clean up the metastrings context and close the output stream.
+        /// </summary>
         public void Dispose()
         {
             if (m_msCtxt != null)
@@ -39,6 +52,9 @@ namespace metascript
 
         public static string DbConnStr;
 
+        /// <summary>
+        /// Get or create the metastrings context.
+        /// </summary>
         public Context MsCtxt
         {
             get
@@ -59,12 +75,18 @@ namespace metascript
         public bool ReadInputYet = false;
         public bool WrittenOutput = false;
 
+        /// <summary>
+        /// Write a string to the output.
+        /// </summary>
         public async Task WriteResponseAsync(string str)
         {
             using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
                 await writer.WriteAsync(str).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Get the request cookies from our special header.
+        /// </summary>
         public Dictionary<string, string> RequestCookies
         {
             get
@@ -86,6 +108,9 @@ namespace metascript
         }
         private Dictionary<string, string> m_requestCookies;
 
+        /// <summary>
+        /// Read the request body.
+        /// </summary>
         public async Task<string> GetRequestPostAsync()
         {
             if (m_requestPost != null)
@@ -104,6 +129,9 @@ namespace metascript
         }
         private string m_requestPost;
 
+        /// <summary>
+        /// End the page with a message.
+        /// </summary>
         public async Task FinishWithMessageAsync(string message)
         {
             if (WrittenOutput)
