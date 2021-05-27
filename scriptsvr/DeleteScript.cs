@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to delete a script.
+    /// </summary>
     class DeleteScript : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

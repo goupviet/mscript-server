@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to save a script.
+    /// </summary>
     class SaveScript : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

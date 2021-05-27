@@ -4,6 +4,9 @@ using System.Text;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to get error log entries.
+    /// </summary>
     class GetErrorLog : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

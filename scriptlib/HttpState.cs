@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
+using Newtonsoft.Json;
+
 using metastrings;
 
 namespace metascript
@@ -145,10 +147,8 @@ namespace metascript
             outputs["ajaxFinish"] = "true";
             outputs["message"] = message;
 
-            string payload = MUtils.ObjectToString(outputs);
-
             using (var writer = new StreamWriter(HttpCtxt.Response.OutputStream, leaveOpen: true))
-                await writer.WriteAsync(payload).ConfigureAwait(false);
+                await writer.WriteAsync(JsonConvert.SerializeObject(outputs)).ConfigureAwait(false);
 
             throw new PageFinishException();
         }

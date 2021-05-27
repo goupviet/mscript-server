@@ -5,6 +5,9 @@ using System.IO;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to execute a script.
+    /// </summary>
     class ExecuteScript : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

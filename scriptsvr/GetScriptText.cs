@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to get the text of a script.
+    /// </summary>
     class GetScriptText : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

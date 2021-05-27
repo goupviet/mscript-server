@@ -7,14 +7,18 @@ using System.Diagnostics;
 
 namespace metascript
 {
+    /// <summary>
+    /// Web server class based on HttpListener.
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
         {
+            // Put the DB somewhere friendly.  Roaming is a bad choice for a store app.
             HttpState.DbConnStr = "Data Source=[MyDocuments]/mscript/mscript.db";
 
             int port = 16914;
-            /* Unused
+            bool localOnly = true;
             for (int a = 0; a < args.Length; ++a)
             {
                 string cur = args[a].TrimStart('-');
@@ -23,12 +27,18 @@ namespace metascript
                 {
                     case "port":
                         port = int.Parse(next);
+                        ++a;
+                        break;
+
+                    case "allowRemoteAccess":
+                        localOnly = false;
                         break;
                 }
             }
-            */
             Console.WriteLine("Port: {0}", port);
 
+            // Kill off any processes already running.
+            // There can be only one!
             try
             {
                 Console.Write("Getting processes...");
@@ -53,6 +63,7 @@ namespace metascript
                 return;
             }
 
+            // Start listening for requests.
             Console.WriteLine("Listening...");
             HttpListener listener = new HttpListener();
             listener.Prefixes.Add($"http://localhost:{port}/");
@@ -67,21 +78,23 @@ namespace metascript
                 return;
             }
 
+            // Process requets.
             Console.WriteLine("Processing...");
             while (true)
             {
                 var ctxt = listener.GetContext();
-                if (!ctxt.Request.IsLocal)
+                if (localOnly && !ctxt.Request.IsLocal) // a little security
                 {
                     Console.WriteLine("Ignoring non-local request");
                     continue;
                 }
 
+                // Fire off a task to handle the request.
                 Task.Run(async () => await HandleClientAsync(ctxt).ConfigureAwait(false));
             }
         }
 
-        public static async Task HandleClientAsync(HttpListenerContext httpCtxt)
+        private static async Task HandleClientAsync(HttpListenerContext httpCtxt)
         {
 #if !DEBUG
             try

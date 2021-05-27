@@ -6,6 +6,9 @@ using Newtonsoft.Json;
 
 namespace metascript
 {
+    /// <summary>
+    /// Handler to rename a script.
+    /// </summary>
     class RenameScript : IPage
     {
         public async Task HandleRequestAsync(HttpState state)

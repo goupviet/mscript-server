@@ -3,8 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.IO;
 
-using Newtonsoft.Json;
-
 namespace metascript
 {
     /// <summary>
@@ -28,28 +26,5 @@ namespace metascript
             }
             return sb.ToString();
         }
-
-        /// <summary>
-        /// Object => JSON
-        /// </summary>
-        public static string ObjectToString(object obj)
-        {
-            StringBuilder sb = new StringBuilder();
-            using (var textWriter = new StringWriter(sb))
-                sm_serializer.Serialize(textWriter, obj);
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// JSON => Object
-        /// </summary>
-        public static T StringToObject<T>(string str)
-        {
-            using (var textReader = new StringReader(str))
-            using (var jsonReader = new JsonTextReader(textReader))
-                return sm_serializer.Deserialize<T>(jsonReader);
-        }
-
-        private static JsonSerializer sm_serializer = new JsonSerializer();
     }
 }
