@@ -145,6 +145,10 @@ namespace metascript
                             page = new GetScriptNames();
                             break;
 
+                        case "starter":
+                            page = new StarterScript();
+                            break;
+
                         case "deletescript":
                             page = new DeleteScript();
                             break;

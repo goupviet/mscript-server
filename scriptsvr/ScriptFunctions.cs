@@ -32,8 +32,14 @@ namespace metascript
         public Task<object> CallAsync(object context, List<object> paramList)
         {
             HttpListenerContext httpCtxt = ((HttpState)context).HttpCtxt;
+
             string key = paramList[0].ToString();
-            return Task.FromResult<object>(httpCtxt.Request.QueryString[key]);
+
+            string value = httpCtxt.Request.QueryString[key];
+            if (value == null)
+                value = "";
+
+            return Task.FromResult<object>(value);
         }
     }
 }
