@@ -206,7 +206,9 @@ namespace metascript
         {
             if (dbValue is double || dbValue is string || dbValue is bool)
                 return dbValue;
-            if (dbValue is DateTime)
+            else if (dbValue == null || dbValue == DBNull.Value)
+                return null;
+            else if (dbValue is DateTime)
                 return ((DateTime)dbValue).ToString("yyyy/MM/dd HH:mm:ss");
             else
                 return Convert.ToDouble(dbValue);
