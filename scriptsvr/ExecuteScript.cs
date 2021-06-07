@@ -12,7 +12,7 @@ namespace metascript
     {
         public async Task HandleRequestAsync(HttpState state)
         {
-            string scriptName = state.HttpCtxt.Request.QueryString["name"];
+            string scriptName = state.HttpCtxt.Request.QueryString["script"];
             if (string.IsNullOrWhiteSpace(scriptName))
                 throw new UserException("Specify the script you want to run");
             
@@ -29,6 +29,8 @@ namespace metascript
                         scriptText,
                         symbols,
                         state.HttpCtxt.Response.OutputStream,
+                        scriptName,
+                        "execute",
                         state,
                         sm_scriptFunctions
                     )

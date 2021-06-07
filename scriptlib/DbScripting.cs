@@ -61,7 +61,7 @@ namespace metascript
                 case "msdb.define":
                     {
                         if (paramList.Count != 2 && paramList.Count != 3)
-                            throw new ScriptException("Incorrect params for define function: table_name, key_value, and optionally a column_data_index");
+                            throw new ScriptException("Incorrect params for define function: tableName, keyValue, optional columnDataIndex");
 
                         if (!(paramList[0] is string))
                             throw new ScriptException("The first parameter to the define function must be the table name as a string");
@@ -93,7 +93,7 @@ namespace metascript
                 case "msdb.delete":
                     {
                         if (paramList.Count != 2)
-                            throw new ScriptException("Incorrect params for delete function: table_name, key_value(s)");
+                            throw new ScriptException("Incorrect params for delete function: tableName, keyValues");
                         if (!(paramList[0] is string))
                             throw new ScriptException("The first parameter to the delete function must be the table name as a string");
                         if (!(paramList[1] is list))
@@ -112,7 +112,7 @@ namespace metascript
                 case "msdb.drop":
                     {
                         if (paramList.Count != 1)
-                            throw new ScriptException("Incorrect params for drop function: table_name");
+                            throw new ScriptException("Incorrect params for drop function: tableName");
                         if (!(paramList[0] is string))
                             throw new ScriptException("The parameter to the drop function must be the table name as a string");
                         await ctxt.Cmd.DropAsync(ScopeTableName(state, (string)paramList[0])).ConfigureAwait(false);

@@ -43,6 +43,8 @@ namespace metascript
                             scriptText,
                             symbols,
                             outputStream,
+                            "cliScript",
+                            "cliAction",
                             state,
                             DbScripting.DbFunctions
                         )
