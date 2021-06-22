@@ -209,7 +209,7 @@ namespace metascript
             else if (dbValue == null || dbValue == DBNull.Value)
                 return null;
             else if (dbValue is DateTime)
-                return ((DateTime)dbValue).ToString("yyyy/MM/dd HH:mm:ss");
+                return ((DateTime)dbValue).ToString("yyyy/MM/dd");
             else
                 return Convert.ToDouble(dbValue);
         }
