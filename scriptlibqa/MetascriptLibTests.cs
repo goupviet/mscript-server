@@ -106,11 +106,12 @@ namespace metascript
             Assert.AreEqual(1, indexResult.Count);
             Assert.AreEqual("monkey", indexResult["bar"]);
 
-            list recordsResult = (list)Functions["msdb.selectRecords"].CallAsync(State, new list() { "SELECT foo, blet FROM test_table" }).Result;
+            list recordsResult = (list)Functions["msdb.selectRecords"].CallAsync(State, new list() { "SELECT foo, blet, created FROM test_table" }).Result;
             Assert.AreEqual(1, recordsResult.Count);
             index firstRecord = (index)recordsResult[0];
             Assert.AreEqual("bar", firstRecord["foo"]);
             Assert.AreEqual("monkey", firstRecord["blet"]);
+            Assert.AreEqual(DateTime.UtcNow.ToString("yyyy/MM/dd"), firstRecord["created"]);
 
             int fullRowCount = (int)(double)Functions["msdb.selectValue"].CallAsync(State, new list() { "SELECT count FROM test_table" }).Result;
             Assert.AreEqual(1, fullRowCount);

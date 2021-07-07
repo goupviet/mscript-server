@@ -152,14 +152,9 @@ namespace metascript
                             while (await reader.ReadAsync().ConfigureAwait(false))
                             {
                                 index row = new index();
-                                for (int f = 0; f < reader.FieldCount; ++f)
-                                {
-                                    object value = reader.GetValue(f);
-                                    if (!(value is string))
-                                        value = Convert.ToDouble(value);
-                                    row.Add(reader.GetName(f), CoerceDbValue(value));
-                                }
                                 rows.Add(row);
+                                for (int f = 0; f < reader.FieldCount; ++f)
+                                    row.Add(reader.GetName(f), CoerceDbValue(reader.GetValue(f)));
                             }
                         }
                         return rows;
