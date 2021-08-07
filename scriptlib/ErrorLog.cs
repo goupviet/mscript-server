@@ -63,7 +63,7 @@ namespace metascript
             select.AddParam("@since", DateTime.UtcNow - TimeSpan.FromDays(maxDaysOld));
             metastrings.ListDictionary<long, DateTime> itemIds = 
                 await ctxt.ExecDictAsync<long, DateTime>(select).ConfigureAwait(false);
-            foreach (var kvp in itemIds.Entries)
+            foreach (var kvp in itemIds)
             {
                 long itemId = kvp.Key;
                 DateTime created = kvp.Value;

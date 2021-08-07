@@ -139,7 +139,7 @@ namespace metascript
                         var  metastringsResult 
                             = await ctxt.ExecDictAsync<object, object>(CreateSelect(state, paramList)).ConfigureAwait(false);
                         index retVal = new index();
-                        foreach (var kvp in metastringsResult.Entries)
+                        foreach (var kvp in metastringsResult)
                             retVal.Add(CoerceDbValue(kvp.Key), CoerceDbValue(kvp.Value));
                         return retVal;
                     }
